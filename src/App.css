@@ -1,0 +1,519 @@
+/* ==========================================
+   Global
+========================================== */
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  font-family: Arial, Tahoma, sans-serif;
+  background: #f5f5f5;
+}
+
+button,
+input {
+  font: inherit;
+}
+
+/* ==========================================
+   Layout
+========================================== */
+
+.app {
+  display: flex;
+  width: 100%;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* ==========================================
+   Sidebar
+========================================== */
+
+.sidebar {
+  width: 300px;
+  min-width: 300px;
+  height: 100vh;
+  padding: 24px 18px;
+  background: white;
+  border-right: 1px solid #dddddd;
+  overflow-y: auto;
+}
+
+.sidebar h1 {
+  margin: 0 0 24px;
+  text-align: center;
+  font-size: 24px;
+  color: #333333;
+}
+
+.menu-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.menu-button {
+  width: 100%;
+  min-height: 58px;
+  padding: 12px 14px;
+  border: none;
+  border-radius: 12px;
+  background: #7150b8;
+  color: white;
+  font-size: 15px;
+  line-height: 1.35;
+  cursor: pointer;
+  transition:
+    background 0.2s,
+    transform 0.2s;
+}
+
+.menu-button:hover {
+  background: #5f3fa4;
+  transform: translateY(-1px);
+}
+
+.menu-button.active {
+  background: #4d2d8f;
+  box-shadow: 0 0 0 3px rgba(113, 80, 184, 0.2);
+}
+
+/* ==========================================
+   Dashboard
+========================================== */
+
+.dashboard {
+  flex: 1;
+  height: 100vh;
+  overflow: hidden;
+  background: #f7f7f7;
+}
+
+.dashboard iframe {
+  width: 100%;
+  height: 100%;
+  border: none;
+  background: white;
+}
+
+/* ==========================================
+   Empty State
+========================================== */
+
+.empty-state {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #555555;
+  text-align: center;
+}
+
+.empty-state h2 {
+  margin: 0 0 10px;
+  font-size: 30px;
+}
+
+.empty-state p {
+  margin: 0;
+  font-size: 17px;
+  color: #777777;
+}
+
+/* ==========================================
+   Sheet Layout
+========================================== */
+
+.sheet-page {
+  width: 100%;
+  height: 100%;
+  padding: 22px;
+  overflow: auto;
+  background: #f3f4f6;
+}
+
+.sheet-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 18px;
+}
+
+.sheet-header h2 {
+  margin: 0 0 6px;
+  font-size: 27px;
+  color: #2f2f2f;
+}
+
+.sheet-status {
+  margin: 0;
+  color: #777777;
+  font-size: 14px;
+}
+
+.sheet-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.search-input {
+  width: 300px;
+  height: 42px;
+  padding: 0 12px;
+  border: 1px solid #cccccc;
+  border-radius: 8px;
+  background: white;
+  outline: none;
+}
+
+.search-input:focus {
+  border-color: #7150b8;
+  box-shadow: 0 0 0 3px rgba(113, 80, 184, 0.12);
+}
+
+.refresh-button {
+  height: 42px;
+  padding: 0 18px;
+  border: none;
+  border-radius: 8px;
+  background: #7150b8;
+  color: white;
+  cursor: pointer;
+}
+
+.refresh-button:hover {
+  background: #5f3fa4;
+}
+
+/* ==========================================
+   Table
+========================================== */
+
+.table-wrapper {
+  width: 100%;
+  overflow: auto;
+  border-radius: 10px;
+  background: white;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+}
+
+.plan-table {
+  width: 100%;
+  min-width: 1450px;
+  border-collapse: collapse;
+  background: white;
+}
+
+.plan-table th,
+.plan-table td {
+  border: 1px solid #cfcfcf;
+  padding: 12px 10px;
+  vertical-align: top;
+  text-align: center;
+  line-height: 1.5;
+  white-space: pre-line;
+}
+
+.plan-table th {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: #efe4aa;
+  color: #222222;
+  font-weight: 700;
+  font-size: 15px;
+}
+
+.plan-table th:nth-child(5),
+.plan-table th:nth-child(6) {
+  color: #b91c1c;
+}
+
+.plan-table tbody tr:nth-child(even) {
+  background: #fafafa;
+}
+
+.plan-table tbody tr:hover {
+  background: #fff8dc;
+}
+
+/* ==========================================
+   Text Alignment
+========================================== */
+
+.text-left {
+  text-align: left !important;
+}
+
+.remark-cell {
+  text-align: left !important;
+  color: #b91c1c;
+  font-weight: 600;
+}
+
+/* ==========================================
+   Column Width
+========================================== */
+
+.receive-column {
+  min-width: 170px;
+}
+
+.subject-column {
+  min-width: 390px;
+}
+
+.group-column {
+  min-width: 150px;
+}
+
+.datetime-column {
+  min-width: 280px;
+}
+
+.remark-column {
+  min-width: 300px;
+}
+
+.attachment-column {
+  min-width: 320px;
+}
+
+/* ==========================================
+   Attachment
+========================================== */
+
+.attachment-link {
+  display: inline-block;
+  padding: 7px 12px;
+  border-radius: 7px;
+  background: #7150b8;
+  color: white;
+  text-decoration: none;
+  transition: background 0.2s;
+}
+
+.attachment-link:hover {
+  background: #5f3fa4;
+}
+
+.attachment-text {
+  color: #555555;
+  font-size: 13px;
+  word-break: break-word;
+}
+
+/* ==========================================
+   Status / Error Box
+========================================== */
+
+.status-box,
+.error-box {
+  padding: 28px;
+  border-radius: 10px;
+  background: white;
+  text-align: center;
+}
+
+.error-box {
+  color: #b91c1c;
+}
+
+.error-box button {
+  margin-top: 12px;
+  padding: 9px 18px;
+  border: none;
+  border-radius: 7px;
+  background: #7150b8;
+  color: white;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.error-box button:hover {
+  background: #5f3fa4;
+}
+
+/* ==========================================
+   Mobile Card Layout
+   Table -> Card on Mobile
+========================================== */
+
+@media (max-width: 768px) {
+
+  .table-wrapper {
+    width: 100%;
+    overflow: visible;
+    background: transparent;
+    box-shadow: none;
+  }
+
+  .plan-table {
+    width: 100%;
+    min-width: 100%;
+    border-collapse: separate;
+    border-spacing: 0 15px;
+    background: transparent;
+  }
+
+
+  /* ซ่อนหัวตาราง */
+  .plan-table thead {
+    display: none;
+  }
+
+
+  /* เปลี่ยนโครงสร้างเป็น Card */
+  .plan-table tbody {
+    display: block;
+  }
+
+
+  .plan-table tr {
+    display: block;
+    width: 100%;
+    margin-bottom: 15px;
+    padding: 15px;
+
+    background: white;
+    border-radius: 12px;
+
+    box-shadow:
+      0 3px 12px rgba(0, 0, 0, 0.08);
+  }
+
+
+  .plan-table td {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+
+    width: 100%;
+
+    border: none;
+    border-bottom: 1px solid #eeeeee;
+
+    padding: 10px 5px;
+
+    font-size: 14px;
+    text-align: right;
+  }
+
+
+  .plan-table td:last-child {
+    border-bottom: none;
+  }
+
+
+  /* แสดงชื่อ Column */
+  .plan-table td::before {
+
+    content: attr(data-label);
+
+    font-weight: 700;
+
+    color: #7150b8;
+
+    text-align: left;
+
+    min-width: 120px;
+
+    margin-right: 10px;
+
+  }
+
+
+  .text-left {
+    text-align: right !important;
+  }
+
+
+  .remark-cell {
+    text-align: right !important;
+  }
+
+
+  .attachment-link {
+
+    padding: 8px 14px;
+
+    border-radius: 8px;
+
+    white-space: nowrap;
+
+  }
+
+}
+
+
+/* ==========================================
+   Small Mobile
+========================================== */
+
+@media (max-width: 480px) {
+
+
+  .sheet-page {
+
+    padding: 10px;
+
+  }
+
+
+  .sheet-header h2 {
+
+    font-size: 20px;
+
+  }
+
+
+  .plan-table tr {
+
+    padding: 12px;
+
+  }
+
+
+  .plan-table td {
+
+    flex-direction: column;
+
+    text-align: left !important;
+
+    font-size: 13px;
+
+  }
+
+
+  .plan-table td::before {
+
+    margin-bottom: 5px;
+
+  }
+
+
+  .attachment-link {
+
+    display: block;
+
+    width: 100%;
+
+    text-align: center;
+
+  }
+
+
+}
