@@ -216,3 +216,77 @@
     flex: 1;
   }
 }
+
+
+.editUserPanel {
+  margin-bottom: 20px;
+  padding: 20px;
+
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 12px;
+}
+
+.editUserPanel h2 {
+  margin-top: 0;
+
+  color: #0f3d73;
+}
+
+.editUserForm {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 15px;
+}
+
+.userFormField {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.userFormField input,
+.userFormField select {
+  height: 42px;
+  padding: 8px 12px;
+
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+
+  color: #000000;
+}
+
+.activeUserCheckbox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.editUserButtons {
+  grid-column: 1 / -1;
+
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.editUserButtons button {
+  padding: 10px 20px;
+
+  border: none;
+  border-radius: 8px;
+
+  cursor: pointer;
+}
+
+.editUserButtons button[type="submit"] {
+  background: #0f3d73;
+  color: #ffffff;
+}
+
+@media (max-width: 768px) {
+  .editUserForm {
+    grid-template-columns: 1fr;
+  }
+}

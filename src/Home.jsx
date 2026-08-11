@@ -17,7 +17,8 @@ import {
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
 
-const API_URLS = "https://script.google.com/macros/s/AKfycbx2DVOZKIOQ0ryjnJ1jOHbtG6rzrjGKyIfEbcdXrppIvDTlgkWq_vsZUjJjSUeKkha2/exec";
+const API_URLS = 
+"https://script.google.com/macros/s/AKfycbx2DVOZKIOQ0ryjnJ1jOHbtG6rzrjGKyIfEbcdXrppIvDTlgkWq_vsZUjJjSUeKkha2/exec";
 
 
 
@@ -43,7 +44,7 @@ function formatSheetDateForFilter(dateText) {
   return `${year}-${month}-${day}`;
 }
 
-function Home({user}) {
+function Home({user, onLogout}) {
     const [menuOpen, setMenuOpen] = useState(false);
     const [department, setDepartment] = useState("ทั้งหมด");
     const tableRef = useRef(null);
@@ -58,6 +59,28 @@ function Home({user}) {
     const [allRows, setAllRows] = useState([]);
     const [loading, setLoading] = useState(false);
     const currentRows =  department === "ทั้งหมด" ? allRows : allRows.filter((row) => row.แผนก?.[department]);
+    const [gwsSource, setGwsSource] = useState("sheet");
+    const [passengerRows, setPassengerRows] = useState([]);
+    const [passengerLoading, setPassengerLoading] = useState(false);
+    const [passengerError, setPassengerError] = useState("");
+    //date sql filter
+    const [passengerStartDate, setPassengerStartDate] = useState("");
+    const [passengerEndDate, setPassengerEndDate] = useState("");
+    const filteredPassengerRows = passengerRows.filter((row) => {
+  const rowDate = String(row.TrnDate || "").slice(0, 10);
+
+  const afterStart =
+    !passengerStartDate ||
+    rowDate >= passengerStartDate;
+
+  const beforeEnd =
+    !passengerEndDate ||
+    rowDate <= passengerEndDate;
+
+  return afterStart && beforeEnd;
+});
+
+
     const dateFilteredRows = selectedDate
   ? currentRows.filter(
       (row) =>
@@ -267,6 +290,46 @@ const pieColors = [
       setLoading(false);
     });
 }
+
+  // Load passenger data from SQL Server
+   async function loadPassengerData() {
+  try {
+    setPassengerLoading(true);
+    setPassengerError("");
+
+    const response = await fetch(
+      "http://localhost:3001/api/passengers"
+    );
+
+    if (!response.ok) {
+      throw new Error("โหลดข้อมูลผู้โดยสารไม่สำเร็จ");
+    }
+
+    const data = await response.json();
+
+    if (!data.success) {
+      throw new Error(
+        data.message || "โหลดข้อมูลผู้โดยสารไม่สำเร็จ"
+      );
+    }
+
+    setPassengerRows(data.rows || []);
+  } catch (error) {
+    console.error("Passenger load error:", error);
+
+    setPassengerError(error.message);
+  } finally {
+    setPassengerLoading(false);
+  }
+}
+   useEffect(() => {
+  if (
+    department === "กวส." &&
+    gwsSource === "sql"
+  ) {
+    loadPassengerData();
+  }
+}, [department, gwsSource]);
     
     useEffect(() => {
       loadSheetOptions();
@@ -396,6 +459,12 @@ const pieColors = [
     👥 จัดการผู้ใช้
   </button>
 )}
+<button
+    className="menu logout-menu"
+    onClick={onLogout}
+  >
+    🔒 ออกจากระบบ
+  </button> 
 
       </aside>
 
@@ -408,6 +477,171 @@ const pieColors = [
           <UserManagement />
         ) : (
           <>
+
+         {department === "กวส." && (
+  <div className="gwsSourceSelector">
+    <label>แหล่งข้อมูล</label>
+
+    <select
+      value={gwsSource}
+      onChange={(event) => setGwsSource(event.target.value)}
+    >
+      <option value="sheet">
+        ข้อมูลงาน Google Sheet
+      </option>
+
+      <option value="sql">
+        ข้อมูลผู้โดยสาร SQL Server
+      </option>
+    </select>
+  </div>
+)}
+
+{department === "กวส." && gwsSource === "sql" ? (
+ <div className="sqlPassengerPage">
+  <h1>ข้อมูลผู้โดยสารจาก SQL Server</h1>
+
+  <div className="passengerRangeFilter">
+  <div>
+    <label>วันที่เริ่มต้น</label>
+
+    <input
+      type="date"
+      value={passengerStartDate}
+      onChange={(event) => setPassengerStartDate(event.target.value)}
+    />
+  </div>
+
+  <div>
+    <label>วันที่สิ้นสุด</label>
+
+    <input
+      type="date"
+      value={passengerEndDate}
+      onChange={(event) => setPassengerEndDate(event.target.value)}
+    />
+  </div>
+
+  {(passengerStartDate || passengerEndDate) && (
+    <button
+      type="button"
+      onClick={() => {
+        setPassengerStartDate("");
+        setPassengerEndDate("");
+      }}
+    >
+      ล้าง
+    </button>
+  )}
+</div>
+
+  <button
+    type="button"
+    onClick={loadPassengerData}
+    disabled={passengerLoading}
+  >
+    {passengerLoading
+      ? "กำลังโหลด..."
+      : "รีเฟรชข้อมูล"}
+  </button>
+
+  {passengerError && (
+    <p>{passengerError}</p>
+  )}
+  
+
+  {!passengerLoading &&
+  !passengerError &&
+  filteredPassengerRows.length > 0 && (
+    <div className="chartBox">
+      <h2>จำนวนผู้โดยสารรายวัน</h2>
+
+      <ResponsiveContainer width="100%" height={400}>
+        <BarChart data={[...filteredPassengerRows].reverse()}>
+          <CartesianGrid strokeDasharray="3 3" />
+
+          <XAxis
+            dataKey="TrnDate"
+            tickFormatter={(value) =>
+              new Date(value).toLocaleDateString("th-TH", {
+                day: "numeric",
+                month: "numeric",
+              })
+            }
+            angle={-45}
+            textAnchor="end"
+            height={80}
+          />
+
+          <YAxis
+            tickFormatter={(value) =>
+              Number(value).toLocaleString()
+            }
+          />
+
+          <Tooltip
+            labelFormatter={(value) =>
+              new Date(value).toLocaleDateString("th-TH")
+            }
+            formatter={(value) => [
+              Number(value).toLocaleString(),
+              "จำนวนผู้โดยสาร",
+            ]}
+          />
+
+          <Bar
+            dataKey="totalPassenger"
+            name="จำนวนผู้โดยสาร"
+            radius={[6, 6, 0, 0]}
+          />
+        </BarChart>
+      </ResponsiveContainer>
+    </div>
+  )}
+
+  {!passengerLoading &&
+    !passengerError &&
+    filteredPassengerRows.length > 0 && (
+      <div className="passengerTableWrapper">
+        <table className="passengerTable">
+          <thead>
+            <tr>
+              <th>วันที่</th>
+              <th>จำนวนผู้โดยสาร</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            {filteredPassengerRows.map((row, index) => (
+              <tr key={index}>
+                <td>
+                  {new Date(row.TrnDate).toLocaleDateString(
+                    "th-TH"
+                  )}
+                </td>
+
+                <td>
+                  {Number(
+                    row.totalPassenger || 0
+                  ).toLocaleString()}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    )}
+    {!passengerLoading &&
+  !passengerError &&
+  filteredPassengerRows.length === 0 && (
+    <p className="emptyChart">
+      ไม่มีข้อมูลผู้โดยสารในช่วงวันที่เลือก
+    </p>
+  )}
+</div>
+) : (
+  <>
+
         <div className="dateFilter">
   <label htmlFor="receiveDate">📅เลือกวันที่</label>
 
@@ -712,6 +946,8 @@ const pieColors = [
          </table>
        </div>
      </div>
+    </>
+    )}
     </>
     )}
 </main>

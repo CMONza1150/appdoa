@@ -1441,3 +1441,104 @@ body,
 .workTable td:nth-child(2) {
   width: 160px;
 }
+
+/* LOG OUT MENU */
+.logout-menu {
+  margin-top: 20px;
+
+  background: #c62828 !important;
+  border-color: #ef5350 !important;
+  color: white !important;
+}
+
+.logout-menu:hover {
+  background: #b71c1c !important;
+}
+
+.gwsSourceSelector {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.gwsSourceSelector label {
+  font-weight: 700;
+}
+
+.gwsSourceSelector select {
+  min-width: 260px;
+  padding: 10px 14px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  background: white;
+}
+
+.sqlPassengerPage {
+  background: white;
+  padding: 24px;
+  border-radius: 16px;
+}
+
+.sqlPassengerPage {
+  background: white;
+  padding: 24px;
+  border-radius: 16px;
+}
+
+.sqlPassengerPage h1 {
+  margin-top: 0;
+}
+
+.passengerTableWrapper {
+  margin-top: 20px;
+  overflow-x: auto;
+}
+
+.passengerTable {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.passengerTable th,
+.passengerTable td {
+  padding: 12px;
+  border-bottom: 1px solid #ddd;
+  text-align: center;
+}
+
+.passengerTable th {
+  background: #174b82;
+  color: white;
+}
+
+.passengerRangeFilter {
+  display: flex;
+  align-items: flex-end;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin: 20px 0;
+}
+
+.passengerRangeFilter > div {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.passengerRangeFilter label {
+  font-weight: 700;
+}
+
+.passengerRangeFilter input {
+  padding: 10px 14px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+}
+
+.passengerRangeFilter button {
+  padding: 10px 16px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
