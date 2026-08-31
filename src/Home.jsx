@@ -1,4 +1,4 @@
-import { useEffect, useRef ,useState } from "react";
+import { useEffect, useRef ,useState ,useMemo} from "react";
 import "./Home.css";
 import UserManagement from "./UserManagement";
 import {
@@ -66,19 +66,187 @@ function Home({user, onLogout}) {
     //date sql filter
     const [passengerStartDate, setPassengerStartDate] = useState("");
     const [passengerEndDate, setPassengerEndDate] = useState("");
-    const filteredPassengerRows = passengerRows.filter((row) => {
-  const rowDate = String(row.TrnDate || "").slice(0, 10);
+    const [selectedAirline, setSelectedAirline] = useState("ทั้งหมด");
+const [selectedAirport, setSelectedAirport] = useState("ทั้งหมด");
+const [passengerView, setPassengerView] = useState("day"); // "chart" หรือ "table"
 
-  const afterStart =
-    !passengerStartDate ||
-    rowDate >= passengerStartDate;
+// รายชื่อสายการบินสำหรับ Dropdown
+const airlineOptions = useMemo(() => {return [
+  "ทั้งหมด",
+  ...Array.from(
+    new Set(
+      passengerRows
+        .map((row) => row.airline)
+        .filter(Boolean)
+    )
+  ).sort(),
+];
+}, [passengerRows]);
 
-  const beforeEnd =
-    !passengerEndDate ||
-    rowDate <= passengerEndDate;
+// รายชื่อท่าอากาศยานสำหรับ Dropdown
+const airportOptions = useMemo(() => {return [
+  "ทั้งหมด",
+  ...Array.from(
+    new Set(
+      passengerRows
+        .map((row) => row.airport)
+        .filter(Boolean)
+    )
+  ).sort(),
+];
+}, [passengerRows]);
 
-  return afterStart && beforeEnd;
-});
+// กรองข้อมูล SQL
+  const filteredPassengerRows = useMemo(() => {
+  return passengerRows.filter((row) => {
+    const rowDate = String(row.TrnDate || "").slice(0, 10);
+
+    const matchesStartDate =
+      !passengerStartDate ||
+      rowDate >= passengerStartDate;
+
+    const matchesEndDate =
+      !passengerEndDate ||
+      rowDate <= passengerEndDate;
+
+    const matchesAirline =
+      selectedAirline === "ทั้งหมด" ||
+      row.airline === selectedAirline;
+
+    const matchesAirport =
+      selectedAirport === "ทั้งหมด" ||
+      row.airport === selectedAirport;
+
+    return (
+      matchesStartDate &&
+      matchesEndDate &&
+      matchesAirline &&
+      matchesAirport
+    );
+  });
+}, [
+  passengerRows,
+  passengerStartDate,
+  passengerEndDate,
+  selectedAirline,
+  selectedAirport,
+]);
+
+  const groupedPassengerData = useMemo(() => {
+  const day = {};
+  const month = {};
+  const year = {};
+
+  filteredPassengerRows.forEach((row) => {
+    const rawDate = row.TrnDate || row.trn_date || "";
+    const date = new Date(rawDate);
+
+    if (Number.isNaN(date.getTime())) {
+      return;
+    }
+
+    const value = Number(
+      row.totalPassenger ??
+        row.total_passenger ??
+        0
+    );
+
+    // DAY
+    const dayKey = date.toISOString().slice(0, 10);
+
+    if (!day[dayKey]) {
+      day[dayKey] = {
+        key: dayKey,
+        label: date.toLocaleDateString("th-TH", {
+          day: "numeric",
+          month: "numeric",
+          year: "numeric",
+        }),
+        totalPassenger: 0,
+      };
+    }
+
+    day[dayKey].totalPassenger += value;
+
+    // MONTH
+    const monthKey = `${date.getFullYear()}-${String(
+      date.getMonth() + 1
+    ).padStart(2, "0")}`;
+
+    if (!month[monthKey]) {
+      month[monthKey] = {
+        key: monthKey,
+        label: date.toLocaleDateString("th-TH", {
+          month: "short",
+          year: "numeric",
+        }),
+        totalPassenger: 0,
+      };
+    }
+
+    month[monthKey].totalPassenger += value;
+
+    // YEAR
+    const yearKey = String(date.getFullYear());
+
+    if (!year[yearKey]) {
+      year[yearKey] = {
+        key: yearKey,
+        label: date.toLocaleDateString("th-TH", {
+          year: "numeric",
+        }),
+        totalPassenger: 0,
+      };
+    }
+
+    year[yearKey].totalPassenger += value;
+  });
+
+  return {
+    day: Object.values(day).sort((a, b) =>
+      a.key.localeCompare(b.key)
+    ),
+
+    month: Object.values(month).sort((a, b) =>
+      a.key.localeCompare(b.key)
+    ),
+
+    year: Object.values(year).sort((a, b) =>
+      a.key.localeCompare(b.key)
+    ),
+  };
+}, [filteredPassengerRows]);
+
+   const groupedPassengerRows = 
+   groupedPassengerData[passengerView] || [];
+
+   const chartPassengerRows = useMemo(() => {
+  if (passengerView === "day") {
+    return groupedPassengerRows.slice(-30);
+  }
+
+  if (passengerView === "month") {
+    return groupedPassengerRows.slice(-12);
+  }
+
+  if (passengerView === "year") {
+    return groupedPassengerRows;
+  }
+
+  return [];
+}, [groupedPassengerRows, passengerView]);
+
+  const tablePassengerRows = useMemo(() => {
+  if (passengerView === "day") {
+    return groupedPassengerRows.slice(-100).reverse();
+  }
+
+  if (passengerView === "month") {
+    return groupedPassengerRows.slice(-36).reverse();
+  }
+
+  return [...groupedPassengerRows].reverse();
+}, [groupedPassengerRows, passengerView]);
 
 
     const dateFilteredRows = selectedDate
@@ -344,7 +512,7 @@ const pieColors = [
     useEffect(() => {
   const timer = setInterval(() => {
     setCurrentTime(new Date());
-  }, 1000);
+  }, 60000);
 
   return () => clearInterval(timer);
 }, []);
@@ -491,7 +659,7 @@ const pieColors = [
       </option>
 
       <option value="sql">
-        ข้อมูลผู้โดยสาร SQL Server
+        ข้อมูลผู้โดยสาร 
       </option>
     </select>
   </div>
@@ -499,40 +667,75 @@ const pieColors = [
 
 {department === "กวส." && gwsSource === "sql" ? (
  <div className="sqlPassengerPage">
-  <h1>ข้อมูลผู้โดยสารจาก SQL Server</h1>
+  <h1>ข้อมูลผู้โดยสาร</h1>
 
-  <div className="passengerRangeFilter">
-  <div>
+  <div className="passengerFilterCard">
+  <div className="filterGroup">
     <label>วันที่เริ่มต้น</label>
-
     <input
       type="date"
       value={passengerStartDate}
-      onChange={(event) => setPassengerStartDate(event.target.value)}
+      onChange={(event) =>
+        setPassengerStartDate(event.target.value)
+      }
     />
   </div>
 
-  <div>
+  <div className="filterGroup">
     <label>วันที่สิ้นสุด</label>
-
     <input
       type="date"
       value={passengerEndDate}
-      onChange={(event) => setPassengerEndDate(event.target.value)}
+      onChange={(event) =>
+        setPassengerEndDate(event.target.value)
+      }
     />
   </div>
 
-  {(passengerStartDate || passengerEndDate) && (
-    <button
-      type="button"
-      onClick={() => {
-        setPassengerStartDate("");
-        setPassengerEndDate("");
-      }}
+  <div className="filterGroup">
+    <label>สายการบิน</label>
+    <select
+      value={selectedAirline}
+      onChange={(event) =>
+        setSelectedAirline(event.target.value)
+      }
     >
-      ล้าง
-    </button>
-  )}
+      {airlineOptions.map((airline) => (
+        <option key={airline} value={airline}>
+          {airline}
+        </option>
+      ))}
+    </select>
+  </div>
+
+  <div className="filterGroup">
+    <label>ท่าอากาศยาน</label>
+    <select
+      value={selectedAirport}
+      onChange={(event) =>
+        setSelectedAirport(event.target.value)
+      }
+    >
+      {airportOptions.map((airport) => (
+        <option key={airport} value={airport}>
+          {airport}
+        </option>
+      ))}
+    </select>
+  </div>
+
+  <button
+    type="button"
+    className="clearPassengerFilter"
+    onClick={() => {
+      setPassengerStartDate("");
+      setPassengerEndDate("");
+      setSelectedAirline("ทั้งหมด");
+      setSelectedAirport("ทั้งหมด");
+    }}
+  >
+    ล้างตัวกรอง
+  </button>
 </div>
 
   <button
@@ -552,50 +755,70 @@ const pieColors = [
 
   {!passengerLoading &&
   !passengerError &&
-  filteredPassengerRows.length > 0 && (
-    <div className="chartBox">
-      <h2>จำนวนผู้โดยสารรายวัน</h2>
+  groupedPassengerRows.length > 0 && (
+    <div className="passengerChartLayout">
+  <div className="passengerViewButtons">
+    <button
+      className={passengerView === "day" ? "active" : ""}
+      onClick={() => setPassengerView("day")}
+    >
+      วัน
+    </button>
 
-      <ResponsiveContainer width="100%" height={400}>
-        <BarChart data={[...filteredPassengerRows].reverse()}>
-          <CartesianGrid strokeDasharray="3 3" />
+    <button
+      className={passengerView === "month" ? "active" : ""}
+      onClick={() => setPassengerView("month")}
+    >
+      เดือน
+    </button>
 
-          <XAxis
-            dataKey="TrnDate"
-            tickFormatter={(value) =>
-              new Date(value).toLocaleDateString("th-TH", {
-                day: "numeric",
-                month: "numeric",
-              })
-            }
-            angle={-45}
-            textAnchor="end"
-            height={80}
-          />
+    <button
+      className={passengerView === "year" ? "active" : ""}
+      onClick={() => setPassengerView("year")}
+    >
+      ปี
+    </button>
+  </div>
 
-          <YAxis
-            tickFormatter={(value) =>
-              Number(value).toLocaleString()
-            }
-          />
+  <div className="chartBox passengerMainChart">
+    <h2>จำนวนผู้โดยสาร</h2>
 
-          <Tooltip
-            labelFormatter={(value) =>
-              new Date(value).toLocaleDateString("th-TH")
-            }
-            formatter={(value) => [
-              Number(value).toLocaleString(),
-              "จำนวนผู้โดยสาร",
-            ]}
-          />
+    <ResponsiveContainer width="100%" height={400}>
+  <BarChart data={chartPassengerRows}>
+    <CartesianGrid strokeDasharray="3 3" />
 
-          <Bar
-            dataKey="totalPassenger"
-            name="จำนวนผู้โดยสาร"
-            radius={[6, 6, 0, 0]}
-          />
-        </BarChart>
-      </ResponsiveContainer>
+    <XAxis
+      dataKey="label"
+      interval="preserveStartEnd"
+      angle={-35}
+      textAnchor="end"
+      height={80}
+    />
+
+    <YAxis
+      tickFormatter={(value) =>
+        Number(value).toLocaleString()
+      }
+    />
+
+    <Tooltip
+      formatter={(value) => [
+        Number(value).toLocaleString(),
+        "จำนวนผู้โดยสาร",
+      ]}
+    />
+
+    <Bar
+      dataKey="totalPassenger"
+      name="จำนวนผู้โดยสาร"
+      fill="#3b82f6"
+      radius={[6, 6, 0, 0]}
+      isAnimationActive={false}
+    />
+  </BarChart>
+</ResponsiveContainer>
+
+  </div>
     </div>
   )}
 
@@ -612,12 +835,10 @@ const pieColors = [
           </thead>
 
           <tbody>
-            {filteredPassengerRows.map((row, index) => (
-              <tr key={index}>
+            {[...tablePassengerRows].map((row) => (
+              <tr key={row.key}>
                 <td>
-                  {new Date(row.TrnDate).toLocaleDateString(
-                    "th-TH"
-                  )}
+                  {row.label}
                 </td>
 
                 <td>
@@ -633,7 +854,7 @@ const pieColors = [
     )}
     {!passengerLoading &&
   !passengerError &&
-  filteredPassengerRows.length === 0 && (
+  groupedPassengerRows.length === 0 && (
     <p className="emptyChart">
       ไม่มีข้อมูลผู้โดยสารในช่วงวันที่เลือก
     </p>

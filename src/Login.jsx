@@ -1,7 +1,7 @@
 import { useState } from "react";
 import "./Login.css";
 
-function Login({ onLogin }) {
+function Login({ onLogin, onRegister }) {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
@@ -91,6 +91,13 @@ function Login({ onLogin }) {
           {loading
             ? "กำลังเข้าสู่ระบบ..."
             : "เข้าสู่ระบบ"}
+        </button>
+
+        <button
+          type="button"
+          onClick={onRegister}
+        >
+          สมัครสมาชิก
         </button>
       </form>
     </div>

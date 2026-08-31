@@ -20,10 +20,10 @@ function UserManagement() {
 
   const [newUser, setNewUser] = useState({
     username: "",
-    password: "",
+    
     name: "",
     role: "user",
-    active: true,
+    active: false,
   });
 
   // ===============================
@@ -137,10 +137,10 @@ function UserManagement() {
 
     setNewUser({
       username: "",
-      password: "",
+      
       name: "",
       role: "user",
-      active: true,
+      active: false,
     });
   }
 
@@ -157,12 +157,7 @@ function UserManagement() {
       return;
     }
 
-    if (newUser.password.length < 6) {
-      setAddMessage(
-        "Password ต้องมีอย่างน้อย 6 ตัวอักษร"
-      );
-      return;
-    }
+    
 
     try {
       setSavingAdd(true);
@@ -173,10 +168,10 @@ function UserManagement() {
         body: JSON.stringify({
           action: "addUser",
           username: newUser.username.trim(),
-          password: newUser.password,
+          
           name: newUser.name.trim(),
           role: newUser.role,
-          active: newUser.active,
+          active: false,
         }),
       });
 
@@ -191,10 +186,10 @@ function UserManagement() {
 
       setNewUser({
         username: "",
-        password: "",
+        
         name: "",
         role: "user",
-        active: true,
+        active: false,
       });
 
       setShowAddForm(false);
@@ -417,19 +412,7 @@ return (
             />
           </div>
 
-          <div className="userFormField">
-            <label>Password</label>
-
-            <input
-              type="password"
-              name="password"
-              value={newUser.password}
-              onChange={handleAddInput}
-              placeholder="อย่างน้อย 6 ตัวอักษร"
-              minLength={6}
-              required
-            />
-          </div>
+          
 
           <div className="userFormField">
             <label>ชื่อ</label>
@@ -462,23 +445,14 @@ return (
             </select>
           </div>
 
-          <label className="activeUserCheckbox">
-            <input
-              type="checkbox"
-              name="active"
-              checked={newUser.active}
-              onChange={handleAddInput}
-            />
-
-            เปิดใช้งานบัญชี
-          </label>
-
+        
+     
           {addMessage && (
             <div className="userFormError">
               {addMessage}
             </div>
           )}
-
+    
           <div className="addUserFormButtons">
             <button
               type="button"

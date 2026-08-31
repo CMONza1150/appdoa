@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import "./App.css";
 import Home from "./Home";
 import Login from "./Login";
+import Register from "./Register";
 // ===============================
 // Apps Script URL
 // ===============================
@@ -16,6 +17,7 @@ const API_URLS =
 function App() {
   const [user, setUser] = useState(null);
   const [checkingLogin, setCheckingLogin] = useState(true);
+  const [showRegister, setShowRegister] = useState(false);
 
   useEffect(() => {
     const savedUser = sessionStorage.getItem("loggedInUser");
@@ -83,8 +85,21 @@ function App() {
   }
 
   if (!user) {
-    return <Login onLogin={handleLogin} />;
+  if (showRegister) {
+    return (
+      <Register
+        onBack={() => setShowRegister(false)}
+      />
+    );
   }
+
+  return (
+    <Login
+      onLogin={handleLogin}
+      onRegister={() => setShowRegister(true)}
+    />
+  );
+}
 
   return (
     <Home

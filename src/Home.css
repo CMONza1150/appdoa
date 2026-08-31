@@ -1542,3 +1542,142 @@ body,
   border-radius: 8px;
   cursor: pointer;
 }
+
+.passengerFilterCard {
+  display: grid;
+  grid-template-columns:
+    minmax(160px, 1fr)
+    minmax(160px, 1fr)
+    minmax(180px, 1.2fr)
+    minmax(220px, 1.4fr)
+    auto;
+  gap: 16px;
+  align-items: end;
+
+  background: white;
+  padding: 20px;
+  margin: 20px 0 24px;
+
+  border-radius: 16px;
+  border: 1px solid #dbe4ef;
+
+  box-shadow: 0 4px 14px rgba(15, 61, 115, 0.08);
+}
+
+.filterGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  min-width: 0;
+}
+
+.filterGroup label {
+  font-size: 14px;
+  font-weight: 700;
+  color: #334155;
+}
+
+.filterGroup input,
+.filterGroup select {
+  width: 100%;
+  height: 44px;
+
+  padding: 0 12px;
+
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+
+  background: #ffffff;
+  color: #1e293b;
+
+  font-size: 14px;
+
+  box-sizing: border-box;
+}
+
+.filterGroup input:focus,
+.filterGroup select:focus {
+  outline: none;
+  border-color: #2563eb;
+
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+}
+
+.clearPassengerFilter {
+  height: 44px;
+
+  padding: 0 18px;
+
+  border: none;
+  border-radius: 10px;
+
+  background: #eef2f7;
+  color: #334155;
+
+  font-weight: 700;
+  cursor: pointer;
+
+  white-space: nowrap;
+}
+
+.clearPassengerFilter:hover {
+  background: #e2e8f0;
+}
+
+/* Tablet */
+@media (max-width: 1100px) {
+  .passengerFilterCard {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .clearPassengerFilter {
+    width: 100%;
+  }
+}
+
+/* Mobile */
+@media (max-width: 600px) {
+  .passengerFilterCard {
+    grid-template-columns: 1fr;
+    padding: 16px;
+    gap: 12px;
+  }
+}
+
+.passengerChartLayout {
+  display: flex;
+  gap: 16px;
+  align-items: stretch;
+  width: 100%;
+}
+
+.passengerViewButtons {
+  width: 90px;
+
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.passengerViewButtons button {
+  height: 46px;
+
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+
+  background: #ffffff;
+
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.passengerViewButtons button.active {
+  background: #0f3d73;
+  color: white;
+  border-color: #0f3d73;
+}
+
+.passengerMainChart {
+  flex: 1;
+  min-width: 0;
+}
