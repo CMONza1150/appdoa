@@ -63,12 +63,27 @@ function Home({user, onLogout}) {
     const [passengerRows, setPassengerRows] = useState([]);
     const [passengerLoading, setPassengerLoading] = useState(false);
     const [passengerError, setPassengerError] = useState("");
+    
     //date sql filter
     const [passengerStartDate, setPassengerStartDate] = useState("");
     const [passengerEndDate, setPassengerEndDate] = useState("");
     const [selectedAirline, setSelectedAirline] = useState("ทั้งหมด");
 const [selectedAirport, setSelectedAirport] = useState("ทั้งหมด");
 const [passengerView, setPassengerView] = useState("day"); // "chart" หรือ "table"
+
+
+function hasPermission(permission) {
+  if (user?.role === "admin") {
+    return true;
+  }
+
+  if (!Array.isArray(user?.permissions)) {
+    return false;
+  }
+
+  return user.permissions.includes(permission);
+}
+
 
 // รายชื่อสายการบินสำหรับ Dropdown
 const airlineOptions = useMemo(() => {return [
@@ -366,13 +381,36 @@ const pieColors = [
   "#ea580c",
 ];
     
-    function chooseDepartment(name) {
-     setDepartment(name);
-     setSelectedPage("dashboard");
-     setMenu("dashboard");
-     
-     setMenuOpen(false);
+    
+function chooseDepartment(name) {
+  const permissionMap = {
+    "ผอ.กผง": "director",
+    "ฝบท.": "fbt",
+    "กยง.": "kyng",
+    "กพข.": "kph",
+    "กวร.": "kwr",
+    "กตป.": "ktp",
+    "กวส.": "kws",
+  };
+
+  const requiredPermission =
+    permissionMap[name];
+
+  // ตรวจสอบสิทธิ์ก่อนเข้า Department
+  if (
+    requiredPermission &&
+    !hasPermission(requiredPermission)
+  ) {
+    return;
   }
+
+  setDepartment(name);
+  setSelectedPage("dashboard");
+  setMenu("dashboard");
+  setMenuOpen(false);
+}
+
+
     function exportExcel() {
   if (filteredRows.length === 0) {
     alert("ไม่มีข้อมูลสำหรับ Export");
@@ -498,6 +536,47 @@ const pieColors = [
     loadPassengerData();
   }
 }, [department, gwsSource]);
+
+
+useEffect(() => {
+  if (!user) {
+    return;
+  }
+
+  // Admin สามารถเข้าถึงทุก Department
+  if (user.role === "admin") {
+    return;
+  }
+
+  const permissions = Array.isArray(user.permissions)
+    ? user.permissions
+    : [];
+
+  // ถ้ามีสิทธิ์หน้าหลัก ให้เริ่มที่ "ทั้งหมด"
+  if (permissions.includes("home")) {
+    setDepartment("ทั้งหมด");
+    return;
+  }
+
+  // หา Department แรกที่ผู้ใช้มีสิทธิ์เข้าถึง
+  const firstAllowedDepartment = [
+    ["director", "ผอ.กผง"],
+    ["fbt", "ฝบท."],
+    ["kyng", "กยง."],
+    ["kph", "กพข."],
+    ["kwr", "กวร."],
+    ["ktp", "กตป."],
+    ["kws", "กวส."],
+  ].find(([permission]) =>
+    permissions.includes(permission)
+  );
+
+  if (firstAllowedDepartment) {
+    setDepartment(firstAllowedDepartment[1]);
+  }
+}, [user]);
+
+
     
     useEffect(() => {
       loadSheetOptions();
@@ -538,79 +617,130 @@ const pieColors = [
           <p>Department of Airports</p>
         </div>
 
-        <button
-  className={
-    department === "ทั้งหมด" ? "menu active" : "menu"
-  }
-  onClick={() => {
-    setDepartment("ทั้งหมด");
-    setSelectedPage("dashboard");
-    
-    setMenu("dashboard");
-    setMenuOpen(false);
-  }}
->
-  🏠 หน้าหลัก
-</button>
+        
+{hasPermission("home") && (
+  <button
+    className={
+      department === "ทั้งหมด"
+        ? "menu active"
+        : "menu"
+    }
+    onClick={() => {
+      setDepartment("ทั้งหมด");
+      setSelectedPage("dashboard");
+      setMenu("dashboard");
+      setMenuOpen(false);
+    }}
+  >
+    🏠 หน้าหลัก
+  </button>
+)}
 
-        <button
-  className={department === "ผอ.กผง" ? "menu active" : "menu"}
-  onClick={() => 
-    chooseDepartment("ผอ.กผง")}
->
-          👤 ผอ.กผง
-        </button>
+{hasPermission("director") && (
+  <button
+    className={
+      department === "ผอ.กผง"
+        ? "menu active"
+        : "menu"
+    }
+    onClick={() =>
+      chooseDepartment("ผอ.กผง")
+    }
+  >
+    👤 ผอ.กผง
+  </button>
+)}
 
-        <button
-  className={department === "ฝบท." ? "menu active" : "menu"}
-  onClick={() => 
-    chooseDepartment("ฝบท.")}
-  
->
-          ฝบท.
-        </button>
+{hasPermission("fbt") && (
+  <button
+    className={
+      department === "ฝบท."
+        ? "menu active"
+        : "menu"
+    }
+    onClick={() =>
+      chooseDepartment("ฝบท.")
+    }
+  >
+    ฝบท.
+  </button>
+)}
 
-        <button
-  className={department === "กยง." ? "menu active" : "menu"}
-  onClick={() => 
-    chooseDepartment("กยง.")}
->
-          กยง.
-        </button>
+{hasPermission("kyng") && (
+  <button
+    className={
+      department === "กยง."
+        ? "menu active"
+        : "menu"
+    }
+    onClick={() =>
+      chooseDepartment("กยง.")
+    }
+  >
+    กยง.
+  </button>
+)}
 
-        <button
-  className={department === "กพข." ? "menu active" : "menu"}
-  onClick={() => 
-    chooseDepartment("กพข.")}
->
-          กพข.
-        </button>
+{hasPermission("kph") && (
+  <button
+    className={
+      department === "กพข."
+        ? "menu active"
+        : "menu"
+    }
+    onClick={() =>
+      chooseDepartment("กพข.")
+    }
+  >
+    กพข.
+  </button>
+)}
 
-        <button
-  className={department === "กวร." ? "menu active" : "menu"}
-  onClick={() => 
-    chooseDepartment("กวร.")}
->
-  
+{hasPermission("kwr") && (
+  <button
+    className={
+      department === "กวร."
+        ? "menu active"
+        : "menu"
+    }
+    onClick={() =>
+      chooseDepartment("กวร.")
+    }
+  >
+    กวร.
+  </button>
+)}
 
-          กวร.
-        </button>
+{hasPermission("ktp") && (
+  <button
+    className={
+      department === "กตป."
+        ? "menu active"
+        : "menu"
+    }
+    onClick={() =>
+      chooseDepartment("กตป.")
+    }
+  >
+    กตป.
+  </button>
+)}
 
-        <button
-  className={department === "กตป." ? "menu active" : "menu"}
-  onClick={() => 
-    chooseDepartment("กตป.")}
->
-          กตป.
-        </button>
+{hasPermission("kws") && (
+  <button
+    className={
+      department === "กวส."
+        ? "menu active"
+        : "menu"
+    }
+    onClick={() =>
+      chooseDepartment("กวส.")
+    }
+  >
+    กวส.
+  </button>
+)}
 
-        <button
-  className={department === "กวส." ? "menu active" : "menu"}
-  onClick={() => 
-    chooseDepartment("กวส.")}
->
-          กวส.
-        </button>
 
         {user?.role === "admin" && (
   <button

@@ -4,6 +4,41 @@ import "./UserManagement.css";
 const API_URLS =
   "https://script.google.com/macros/s/AKfycbx2DVOZKIOQ0ryjnJ1jOHbtG6rzrjGKyIfEbcdXrppIvDTlgkWq_vsZUjJjSUeKkha2/exec";
 
+const PAGE_PERMISSIONS = [
+  {
+    value: "home",
+    label: "หน้าหลัก",
+  },
+  {
+    value: "director",
+    label: "ผอ.กผง",
+  },
+  {
+    value: "fbt",
+    label: "ฝบท.",
+  },
+  {
+    value: "kyng",
+    label: "กยง.",
+  },
+  {
+    value: "kph",
+    label: "กพข.",
+  },
+  {
+    value: "kwr",
+    label: "กวร.",
+  },
+  {
+    value: "ktp",
+    label: "กตป.",
+  },
+  {
+    value: "kws",
+    label: "กวส.",
+  },
+];
+
 function UserManagement() {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -17,12 +52,14 @@ function UserManagement() {
   const [savingAdd, setSavingAdd] = useState(false);
   const [addMessage, setAddMessage] = useState("");
   const [deletingUser, setDeletingUser] = useState("");
+  const [resettingUser, setResettingUser] = useState("");
 
   const [newUser, setNewUser] = useState({
     username: "",
     
     name: "",
     role: "user",
+    permissions: ["home"],
     active: false,
   });
 
@@ -37,6 +74,8 @@ function UserManagement() {
   const [editPassword, setEditPassword] = useState("");
   const [savingEdit, setSavingEdit] = useState(false);
   const [editMessage, setEditMessage] = useState("");
+  const [editPermissions, setEditPermissions] = useState([]);
+
 
   // ===============================
   // Load Users
@@ -123,6 +162,35 @@ function UserManagement() {
     }));
   }
 
+  function handleAddPermission(permission) {
+  setNewUser((previous) => {
+    const alreadySelected =
+      previous.permissions.includes(permission);
+       
+    return {
+      ...previous,
+      permissions: alreadySelected
+        ? previous.permissions.filter(
+            (item) => item !== permission
+          )
+        : [...previous.permissions, permission],
+    };
+  });
+}
+
+function handleEditPermission(permission) {
+  setEditPermissions((previous) => {
+    const alreadySelected =
+      previous.includes(permission);
+
+    return alreadySelected
+      ? previous.filter(
+          (item) => item !== permission
+        )
+      : [...previous, permission];
+  });
+}
+
   function openAddForm() {
     setEditingUser(null);
     setEditMessage("");
@@ -140,6 +208,7 @@ function UserManagement() {
       
       name: "",
       role: "user",
+      permissions: ["home"],
       active: false,
     });
   }
@@ -168,7 +237,7 @@ function UserManagement() {
         body: JSON.stringify({
           action: "addUser",
           username: newUser.username.trim(),
-          
+          permissions: newUser.role === "admin" ? ["all"] : newUser.permissions,
           name: newUser.name.trim(),
           role: newUser.role,
           active: false,
@@ -189,6 +258,7 @@ function UserManagement() {
         
         name: "",
         role: "user",
+        permissions: ["home"],
         active: false,
       });
 
@@ -215,23 +285,38 @@ function UserManagement() {
   // ===============================
 
   function startEdit(user) {
-    setShowAddForm(false);
-    setAddMessage("");
+  setShowAddForm(false);
+  setAddMessage("");
 
-    setEditingUser(user.username);
-    setEditName(user.name || "");
-    setEditRole(user.role || "user");
-    setEditActive(
-      checkActive(user.active)
-    );
+  setEditingUser(user.username);
+  setEditName(user.name || "");
+  setEditRole(user.role || "user");
 
-    setEditPassword("");
-    setEditMessage("");
+  let userPermissions = [];
+
+  if (Array.isArray(user.permissions)) {
+    userPermissions = user.permissions;
+  } else if (typeof user.permissions === "string") {
+    userPermissions = user.permissions
+      .split(",")
+      .map((item) => item.trim())
+      .filter(Boolean);
   }
+
+  setEditPermissions(userPermissions);
+
+  setEditActive(
+    checkActive(user.active)
+  );
+
+  setEditPassword("");
+  setEditMessage("");
+}
 
   function cancelEdit() {
     setEditingUser(null);
     setEditPassword("");
+    setEditPermissions([]);
     setEditMessage("");
   }
 
@@ -264,6 +349,7 @@ function UserManagement() {
           username: editingUser,
           name: editName.trim(),
           role: editRole,
+          permissions: editRole === "admin" ? ["all"] : editPermissions,
           active: editActive,
           password: editPassword,
         }),
@@ -337,6 +423,55 @@ function UserManagement() {
     alert(error.message || "ลบผู้ใช้ไม่สำเร็จ");
   } finally {
     setDeletingUser("");
+  }
+}
+
+
+async function handleResetPassword(user) {
+  const confirmed = window.confirm(
+    `ต้องการ Reset Password ของ "${user.username}" ใช่หรือไม่?\n\n` +
+      "ผู้ใช้นี้จะต้องตั้ง Password ใหม่ก่อนเข้าสู่ระบบ"
+  );
+
+  if (!confirmed) {
+    return;
+  }
+
+  try {
+    setResettingUser(user.username);
+
+    const response = await fetch(API_URLS, {
+      method: "POST",
+      body: JSON.stringify({
+        action: "resetPassword",
+        username: user.username,
+      }),
+    });
+
+    const result = await response.json();
+
+    if (!result.success) {
+      throw new Error(
+        result.message || "Reset Password ไม่สำเร็จ"
+      );
+    }
+
+    alert(
+      "Reset Password สำเร็จ\nผู้ใช้ต้องตั้ง Password ใหม่"
+    );
+
+    await loadUsers();
+  } catch (error) {
+    console.error(
+      "Reset password error:",
+      error
+    );
+
+    alert(
+      error.message || "Reset Password ไม่สำเร็จ"
+    );
+  } finally {
+    setResettingUser("");
   }
 }
 
@@ -427,23 +562,48 @@ return (
             />
           </div>
 
+
           <div className="userFormField">
-            <label>สิทธิ์</label>
+  <label>ประเภทผู้ใช้งาน</label>
 
-            <select
-              name="role"
-              value={newUser.role}
-              onChange={handleAddInput}
-            >
-              <option value="user">
-                User
-              </option>
+  <select
+    name="role"
+    value={newUser.role}
+    onChange={handleAddInput}
+  >
+    <option value="user">User</option>
+    <option value="admin">Admin</option>
+  </select>
+</div>
 
-              <option value="admin">
-                Admin
-              </option>
-            </select>
-          </div>
+
+{newUser.role === "user" && (
+  <div className="userFormField">
+    <label>สิทธิ์เข้าถึงหน้า</label>
+
+    <div className="permissionCheckboxGroup">
+      {PAGE_PERMISSIONS.map((permission) => (
+        <label
+          key={permission.value}
+          className="permissionCheckbox"
+        >
+          <input
+            type="checkbox"
+            checked={newUser.permissions.includes(
+              permission.value
+            )}
+            onChange={() =>
+              handleAddPermission(permission.value)
+            }
+          />
+
+          <span>{permission.label}</span>
+        </label>
+      ))}
+    </div>
+  </div>
+)}
+
 
         
      
@@ -514,26 +674,56 @@ return (
           </div>
 
           <div className="userFormField">
-            <label>สิทธิ์</label>
+  <label>ประเภทผู้ใช้งาน</label>
 
-            <select
-              value={editRole}
-              onChange={(event) =>
-                setEditRole(event.target.value)
-              }
-            >
-              <option value="user">
-                User
-              </option>
+  <select
+    value={editRole}
+    onChange={(event) =>
+      setEditRole(event.target.value)
+    }
+  >
+    <option value="user">
+      User
+    </option>
 
-              <option value="admin">
-                Admin
-              </option>
-            </select>
-          </div>
+    <option value="admin">
+      Admin
+    </option>
+  </select>
+</div>
 
-          <div className="userFormField">
-            <label>Password ใหม่</label>
+
+{editRole === "user" && (
+  <div className="userFormField">
+    <label>สิทธิ์เข้าถึงหน้า</label>
+
+    <div className="permissionCheckboxGroup">
+      {PAGE_PERMISSIONS.map((permission) => (
+        <label
+          key={permission.value}
+          className="permissionCheckbox"
+        >
+          <input
+            type="checkbox"
+            checked={editPermissions.includes(
+              permission.value
+            )}
+            onChange={() =>
+              handleEditPermission(permission.value)
+            }
+          />
+
+          <span>{permission.label}</span>
+        </label>
+      ))}
+    </div>
+  </div>
+)}
+
+
+
+<div className="userFormField">
+  <label>Password ใหม่</label>
 
             <input
               type="password"
@@ -620,6 +810,7 @@ return (
               <th>ชื่อ</th>
               <th>สิทธิ์</th>
               <th>สถานะ</th>
+              <th>สถานะ Password</th>
               <th>จัดการ</th>
             </tr>
           </thead>
@@ -667,6 +858,18 @@ return (
                   </td>
 
                   <td>
+  {Number(user.first_pass) === 1 ? (
+    <span className="activeBadge">
+      พร้อมใช้งาน
+    </span>
+  ) : (
+    <span className="inactiveBadge">
+      รอตั้ง Password
+    </span>
+  )}
+</td>
+
+                  <td>
                     <div className="userActionButtons">
                       <button
                         type="button"
@@ -688,7 +891,21 @@ return (
     ? "กำลังลบ..."
     : "ลบ"}
 </button>
+
+ <button
+    type="button"
+    className="resetPasswordButton"
+    onClick={() => handleResetPassword(user)}
+    disabled={resettingUser === user.username}
+  >
+    {resettingUser === user.username
+      ? "กำลังรีเซ็ต..."
+      : "Reset Password"}
+  </button>
+
                     </div>
+
+                    
                   </td>
                 </tr>
               );
