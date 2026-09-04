@@ -63,13 +63,18 @@ function Home({user, onLogout}) {
     const [passengerRows, setPassengerRows] = useState([]);
     const [passengerLoading, setPassengerLoading] = useState(false);
     const [passengerError, setPassengerError] = useState("");
+
+    const [commentRow, setCommentRow] = useState(null);
+    const [commentText, setCommentText] = useState("");
+    const [savingComment, setSavingComment] = useState(false);
     
     //date sql filter
     const [passengerStartDate, setPassengerStartDate] = useState("");
     const [passengerEndDate, setPassengerEndDate] = useState("");
     const [selectedAirline, setSelectedAirline] = useState("ทั้งหมด");
-const [selectedAirport, setSelectedAirport] = useState("ทั้งหมด");
-const [passengerView, setPassengerView] = useState("day"); // "chart" หรือ "table"
+    const [selectedAirport, setSelectedAirport] = useState("ทั้งหมด");
+    const [passengerView, setPassengerView] = useState("day"); // "chart" หรือ "table"
+   
 
 
 function hasPermission(permission) {
@@ -495,6 +500,55 @@ function chooseDepartment(name) {
     .finally(() => {
       setLoading(false);
     });
+}
+
+//comment//
+async function saveComment() {
+  if (!commentRow) {
+    return;
+  }
+
+  if (!commentText.trim()) {
+    alert("กรุณากรอก Comment");
+    return;
+  }
+
+  try {
+    setSavingComment(true);
+
+    const response = await fetch(API_URLS, {
+      method: "POST",
+      body: JSON.stringify({
+        action: "updateComment",
+        sheet: selectedSheet,
+        receiveNumber: commentRow.เลขรับ,
+        comment: commentText.trim(),
+        username: user?.username || "",
+        name: user?.name || "",
+      }),
+    });
+
+    const result = await response.json();
+
+    if (!result.success) {
+      throw new Error(
+        result.message || "บันทึก Comment ไม่สำเร็จ"
+      );
+    }
+
+    setCommentRow(null);
+    setCommentText("");
+
+    await loadData();
+  } catch (error) {
+    console.error("Save comment error:", error);
+
+    alert(
+      error.message || "บันทึก Comment ไม่สำเร็จ"
+    );
+  } finally {
+    setSavingComment(false);
+  }
 }
 
   // Load passenger data from SQL Server
@@ -1250,23 +1304,41 @@ useEffect(() => {
               <td>{row.เลขรับ}</td>
               <td>{row.เจ้าของเรื่อง || "-"}</td>
               <td>{row.เรื่อง}</td>
+             
               <td>
-  <span
-    className={`status-badge ${
-      isOverdue(row)
-        ? "status-late"
-        : row.สถานะ === "กำลังดำเนินการ"
-        ? "status-progress"
-        : row.สถานะ === "เสร็จสิ้น"
-        ? "status-complete"
-        : row.สถานะ === "ยกเลิก"
-        ? "status-cancel"
-        : ""
-    }`}
-  >
-    {isOverdue(row) ? "เกินกำหนด" : row.สถานะ}
-  </span>
-</td>
+  <div className="statusWithComment">
+    <span
+      className={`status-badge ${
+        isOverdue(row)
+          ? "status-late"
+          : row.สถานะ === "กำลังดำเนินการ"
+          ? "status-progress"
+          : row.สถานะ === "เสร็จสิ้น"
+          ? "status-complete"
+          : row.สถานะ === "ยกเลิก"
+          ? "status-cancel"
+          : ""
+      }`}
+    >
+      {isOverdue(row) ? "เกินกำหนด" : row.สถานะ}
+    </span>
+
+    {(row.สถานะ === "กำลังดำเนินการ" ||
+      row.สถานะ === "ยกเลิก") && (
+      <button
+        type="button"
+        className="commentMenuButton"
+        onClick={() => {
+          setCommentRow(row);
+          setCommentText("");
+        }}
+        title="เพิ่ม Comment"
+      >
+        ⋮
+      </button>
+    )}
+  </div>
+              </td>
               <td>{row.วันที่กำหนดส่ง}</td>
               <td>{row.หมายเหตุ}</td>
               <td className="attachment-cell">
@@ -1301,6 +1373,92 @@ useEffect(() => {
     )}
     </>
     )}
+
+    {commentRow && (
+  <div
+    className="commentModalOverlay"
+    onClick={() => {
+      if (!savingComment) {
+        setCommentRow(null);
+        setCommentText("");
+      }
+    }}
+  >
+    <div
+      className="commentModal"
+      onClick={(event) => event.stopPropagation()}
+    >
+      <div className="commentModalHeader">
+        <h3>เพิ่ม Comment</h3>
+
+        <button
+          type="button"
+          onClick={() => {
+            setCommentRow(null);
+            setCommentText("");
+          }}
+          disabled={savingComment}
+        >
+          ×
+        </button>
+      </div>
+
+      <p>
+        เลขรับ: {commentRow.เลขรับ}
+      </p>
+
+      <p>
+        สถานะ: {commentRow.สถานะ}
+      </p>
+
+      {commentRow.Comment && (
+  <div className="oldComments">
+    <label>Comment ก่อนหน้า</label>
+
+    <div className="oldCommentsBox">
+      {commentRow.Comment}
+    </div>
+  </div>
+)}
+
+      <textarea
+        value={commentText}
+        onChange={(event) =>
+          setCommentText(event.target.value)
+        }
+        placeholder="เขียน Comment..."
+        rows={5}
+        autoFocus
+      />
+    
+      <div className="commentModalButtons">
+        <button
+          type="button"
+          onClick={() => {
+            setCommentRow(null);
+            setCommentText("");
+          }}
+          disabled={savingComment}
+        >
+          ยกเลิก
+        </button>
+
+        <button
+          type="button"
+          onClick={saveComment}
+          disabled={
+            savingComment ||
+            !commentText.trim()
+          }
+        >
+          {savingComment
+            ? "กำลังบันทึก..."
+            : "บันทึก Comment"}
+        </button>
+      </div>
+    </div>
+  </div>
+)}
 </main>
 </div>
 );
