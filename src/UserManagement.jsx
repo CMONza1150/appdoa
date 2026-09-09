@@ -899,8 +899,8 @@ return (
     disabled={resettingUser === user.username}
   >
     {resettingUser === user.username
-      ? "กำลังรีเซ็ต..."
-      : "Reset Password"}
+  ? "กำลังรีเซ็ต…"
+  : "🔑 Reset Password"}
   </button>
 
                     </div>

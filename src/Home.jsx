@@ -17,10 +17,13 @@ import {
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
 
+// URLs ของ google sheet ตารางงานกองแผนงาน //
 const API_URLS = 
 "https://script.google.com/macros/s/AKfycbx2DVOZKIOQ0ryjnJ1jOHbtG6rzrjGKyIfEbcdXrppIvDTlgkWq_vsZUjJjSUeKkha2/exec";
 
-
+// URL ของ กตป ระบบติดตามงบประมาณ //
+const BUDGET_DASHBOARD_URL = 
+"https://script.google.com/macros/s/AKfycbyf1OoM5YqOiadIKUCz9LmXmAAReZJH_tsvIz5Zfc7vkLSMIjZGkcJilt1rJOYsRVVNMQ/exec";
 
 
 function formatSheetDateForFilter(dateText) {
@@ -43,6 +46,38 @@ function formatSheetDateForFilter(dateText) {
 
   return `${year}-${month}-${day}`;
 }
+
+const DEPARTMENT_MENUS = [
+  {
+    permission: "director",
+    name: "ผอ.กผง",
+    icon: "👤",
+  },
+  {
+    permission: "fbt",
+    name: "ฝบท.",
+  },
+  {
+    permission: "kyng",
+    name: "กยง.",
+  },
+  {
+    permission: "kph",
+    name: "กพข.",
+  },
+  {
+    permission: "kwr",
+    name: "กวร.",
+  },
+  {
+    permission: "ktp",
+    name: "กตป.",
+  },
+  {
+    permission: "kws",
+    name: "กวส.",
+  },
+];
 
 function Home({user, onLogout}) {
     const [menuOpen, setMenuOpen] = useState(false);
@@ -67,6 +102,9 @@ function Home({user, onLogout}) {
     const [commentRow, setCommentRow] = useState(null);
     const [commentText, setCommentText] = useState("");
     const [savingComment, setSavingComment] = useState(false);
+
+    const [departmentView, setDepartmentView] = useState("work");
+    const [openDepartmentMenu, setOpenDepartmentMenu] = useState("");
     
     //date sql filter
     const [passengerStartDate, setPassengerStartDate] = useState("");
@@ -75,7 +113,19 @@ function Home({user, onLogout}) {
     const [selectedAirport, setSelectedAirport] = useState("ทั้งหมด");
     const [passengerView, setPassengerView] = useState("day"); // "chart" หรือ "table"
    
+function toggleDepartmentMenu(name) {
+  setOpenDepartmentMenu((current) =>
+    current === name ? "" : name
+  );
+}
 
+function selectDepartmentView(name, view) {
+  setDepartment(name);
+  setDepartmentView(view);
+  setSelectedPage("dashboard");
+  setMenu("dashboard");
+  setMenuOpen(false);
+}
 
 function hasPermission(permission) {
   if (user?.role === "admin") {
@@ -502,6 +552,18 @@ function chooseDepartment(name) {
     });
 }
 
+
+function getCommentCount(comment) {
+  if (!comment) {
+    return 0;
+  }
+
+  const matches = String(comment).match(
+    /^\[\d{2}\/\d{2}\/\d{4}\s+\d{2}:\d{2}\s+-.*\]/gm
+  );
+
+  return matches ? matches.length : 0;
+}
 //comment//
 async function saveComment() {
   if (!commentRow) {
@@ -672,9 +734,12 @@ useEffect(() => {
         </div>
 
         
+       
+  
 {hasPermission("home") && (
   <button
     className={
+      menu === "dashboard" &&
       department === "ทั้งหมด"
         ? "menu active"
         : "menu"
@@ -690,110 +755,79 @@ useEffect(() => {
   </button>
 )}
 
-{hasPermission("director") && (
-  <button
-    className={
-      department === "ผอ.กผง"
-        ? "menu active"
-        : "menu"
-    }
-    onClick={() =>
-      chooseDepartment("ผอ.กผง")
-    }
-  >
-    👤 ผอ.กผง
-  </button>
-)}
 
-{hasPermission("fbt") && (
-  <button
-    className={
-      department === "ฝบท."
-        ? "menu active"
-        : "menu"
-    }
-    onClick={() =>
-      chooseDepartment("ฝบท.")
-    }
-  >
-    ฝบท.
-  </button>
-)}
+  {DEPARTMENT_MENUS.map((item) => {
+  if (!hasPermission(item.permission)) {
+    return null;
+  }
 
-{hasPermission("kyng") && (
-  <button
-    className={
-      department === "กยง."
-        ? "menu active"
-        : "menu"
-    }
-    onClick={() =>
-      chooseDepartment("กยง.")
-    }
-  >
-    กยง.
-  </button>
-)}
+  const isOpen = openDepartmentMenu === item.name;
 
-{hasPermission("kph") && (
-  <button
-    className={
-      department === "กพข."
-        ? "menu active"
-        : "menu"
-    }
-    onClick={() =>
-      chooseDepartment("กพข.")
-    }
-  >
-    กพข.
-  </button>
-)}
+  return (
+    <div
+      className="departmentMenuGroup"
+      key={item.name}
+    >
+      <button
+        className={
+          menu === "dashboard" &&
+          department === item.name
+            ? "menu active"
+            : "menu"
+        }
+        onClick={() =>
+          toggleDepartmentMenu(item.name)
+        }
+      >
+        <span>
+          {item.icon || ""} {item.name}
+        </span>
 
-{hasPermission("kwr") && (
-  <button
-    className={
-      department === "กวร."
-        ? "menu active"
-        : "menu"
-    }
-    onClick={() =>
-      chooseDepartment("กวร.")
-    }
-  >
-    กวร.
-  </button>
-)}
+        <span className="menuArrow">
+          {isOpen ? "▲" : "▼"}
+        </span>
+      </button>
 
-{hasPermission("ktp") && (
-  <button
-    className={
-      department === "กตป."
-        ? "menu active"
-        : "menu"
-    }
-    onClick={() =>
-      chooseDepartment("กตป.")
-    }
-  >
-    กตป.
-  </button>
-)}
+      {isOpen && (
+        <div className="departmentSubmenu">
+          <button
+            className={
+              department === item.name &&
+              departmentView === "work"
+                ? "submenuButton active"
+                : "submenuButton"
+            }
+            onClick={() =>
+              selectDepartmentView(
+                item.name,
+                "work"
+              )
+            }
+          >
+            ติดตามงาน
+          </button>
 
-{hasPermission("kws") && (
-  <button
-    className={
-      department === "กวส."
-        ? "menu active"
-        : "menu"
-    }
-    onClick={() =>
-      chooseDepartment("กวส.")
-    }
-  >
-    กวส.
-  </button>
-)}
+          <button
+            className={
+              department === item.name &&
+              departmentView === "budget"
+                ? "submenuButton active"
+                : "submenuButton"
+            }
+            onClick={() =>
+              selectDepartmentView(
+                item.name,
+                "budget"
+              )
+            }
+          >
+            ติดตามงบประมาณ
+          </button>
+        </div>
+      )}
+    </div>
+  );
+})}
 
 
         {user?.role === "admin" && (
@@ -805,6 +839,7 @@ useEffect(() => {
     }
     onClick={() => {
       setMenu("users");
+      setOpenDepartmentMenu("");
       setMenuOpen(false);
     }}
   >
@@ -823,14 +858,26 @@ useEffect(() => {
       
 
       {/* Main Content */}
-      <main className="content">
+      <main className={'content ${departmentView === "budget" ? "budgetMode" : ""}'}>
+
+      
 
         {menu === "users" && user?.role === "admin" ? (
           <UserManagement />
         ) : (
           <>
 
-         {department === "กวส." && (
+          {departmentView === "budget" && department !== "ทั้งหมด" ? (
+  <div className="budgetDashboardContainer">
+    <iframe
+      src={BUDGET_DASHBOARD_URL}
+      title="Dashboard ติดตามงบประมาณ"
+      className="budgetDashboardFrame"
+    />
+  </div>
+) : (
+  <>
+     {department === "กวส." && (
   <div className="gwsSourceSelector">
     <label>แหล่งข้อมูล</label>
 
@@ -1312,12 +1359,12 @@ useEffect(() => {
         isOverdue(row)
           ? "status-late"
           : row.สถานะ === "กำลังดำเนินการ"
-          ? "status-progress"
-          : row.สถานะ === "เสร็จสิ้น"
-          ? "status-complete"
-          : row.สถานะ === "ยกเลิก"
-          ? "status-cancel"
-          : ""
+            ? "status-progress"
+            : row.สถานะ === "เสร็จสิ้น"
+              ? "status-complete"
+              : row.สถานะ === "ยกเลิก"
+                ? "status-cancel"
+                : ""
       }`}
     >
       {isOverdue(row) ? "เกินกำหนด" : row.สถานะ}
@@ -1325,20 +1372,32 @@ useEffect(() => {
 
     {(row.สถานะ === "กำลังดำเนินการ" ||
       row.สถานะ === "ยกเลิก") && (
-      <button
-        type="button"
-        className="commentMenuButton"
-        onClick={() => {
-          setCommentRow(row);
-          setCommentText("");
-        }}
-        title="เพิ่ม Comment"
-      >
-        ⋮
-      </button>
+      <>
+        <span
+          className={
+            getCommentCount(row.Comment) > 0
+              ? "commentCountBadge hasComment"
+              : "commentCountBadge"
+          }
+        >
+          💬 {getCommentCount(row.Comment)}
+        </span>
+
+        <button
+          type="button"
+          className="commentMenuButton"
+          onClick={() => {
+            setCommentRow(row);
+            setCommentText("");
+          }}
+          title="ดูหรือเพิ่ม Comment"
+        >
+          ⋮
+        </button>
+      </>
     )}
   </div>
-              </td>
+</td>
               <td>{row.วันที่กำหนดส่ง}</td>
               <td>{row.หมายเหตุ}</td>
               <td className="attachment-cell">
@@ -1431,6 +1490,8 @@ useEffect(() => {
         autoFocus
       />
     
+   
+    
       <div className="commentModalButtons">
         <button
           type="button"
@@ -1459,6 +1520,10 @@ useEffect(() => {
     </div>
   </div>
 )}
+  </>
+)}
+
+        
 </main>
 </div>
 );

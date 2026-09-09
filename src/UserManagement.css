@@ -217,6 +217,34 @@
   }
 }
 
+.resetPasswordButton {
+  background: #f59e0b;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 12px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.resetPasswordButton:hover {
+  background: #d97706;
+}
+
+.resetPasswordButton:disabled {
+  background: #d1d5db;
+  color: #6b7280;
+  cursor: not-allowed;
+}
+
+.userActionButtons {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: nowrap;
+}
+
 
 .editUserPanel {
   margin-bottom: 20px;
@@ -289,4 +317,374 @@
   .editUserForm {
     grid-template-columns: 1fr;
   }
+}
+
+.userManagementPage {
+  padding: 24px;
+}
+
+.userTableWrapper {
+  background: #ffffff;
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.08);
+}
+
+.userTable {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.userTable thead {
+  background: #1f4f78;
+  color: white;
+}
+
+.userTable th {
+  padding: 14px 12px;
+  text-align: center;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.userTable td {
+  padding: 13px 12px;
+  text-align: center;
+  border-bottom: 1px solid #e5e7eb;
+  vertical-align: middle;
+}
+
+.userTable tbody tr {
+  transition: background 0.2s ease;
+}
+
+.userTable tbody tr:hover {
+  background: #f8fafc;
+}
+
+.userTable tbody tr:last-child td {
+  border-bottom: none;
+}
+
+/* Role */
+
+.roleBadge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 58px;
+  padding: 5px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.adminRole {
+  background: #f3e8ff;
+  color: #7e22ce;
+}
+
+.userRole {
+  background: #e0f2fe;
+  color: #0369a1;
+}
+
+/* Status */
+
+.activeBadge,
+.inactiveBadge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 82px;
+  padding: 5px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.activeBadge {
+  background: #dcfce7;
+  color: #15803d;
+}
+
+.inactiveBadge {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+/* Action buttons */
+
+.userActionButtons {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  flex-wrap: nowrap;
+}
+
+.editUserButton,
+.deleteUserButton,
+.resetPasswordButton {
+  height: 34px;
+  border: none;
+  border-radius: 7px;
+  padding: 0 12px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition:
+    transform 0.15s ease,
+    opacity 0.15s ease;
+}
+
+.editUserButton {
+  background: #2563eb;
+  color: white;
+}
+
+.deleteUserButton {
+  background: #ef4444;
+  color: white;
+}
+
+.resetPasswordButton {
+  background: #f59e0b;
+  color: #ffffff;
+  min-width: 130px;
+}
+
+.editUserButton:hover,
+.deleteUserButton:hover,
+.resetPasswordButton:hover {
+  transform: translateY(-1px);
+  opacity: 0.88;
+}
+
+.editUserButton:disabled,
+.deleteUserButton:disabled,
+.resetPasswordButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* ===============================
+Add User Panel
+================================ */
+
+.addUserPanel {
+max-width: 900px;
+margin: 24px auto;
+padding: 24px 28px;
+background: #ffffff;
+border: 1px solid #e2e8f0;
+border-radius: 14px;
+box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+}
+
+.addUserPanelHeader {
+display: flex;
+align-items: center;
+justify-content: space-between;
+margin-bottom: 22px;
+padding-bottom: 14px;
+border-bottom: 1px solid #e5e7eb;
+}
+
+.addUserPanelHeader h2 {
+margin: 0;
+font-size: 20px;
+color: #1e3a5f;
+}
+
+.closeUserFormButton {
+width: 34px;
+height: 34px;
+border: none;
+border-radius: 50%;
+background: #f1f5f9;
+color: #475569;
+font-size: 22px;
+cursor: pointer;
+}
+
+.closeUserFormButton:hover {
+background: #fee2e2;
+color: #dc2626;
+}
+
+
+/* ===============================
+Form
+================================ */
+
+.addUserForm {
+display: grid;
+grid-template-columns: 1fr 1fr;
+gap: 18px 20px;
+}
+
+.userFormField {
+display: flex;
+flex-direction: column;
+gap: 7px;
+}
+
+.userFormField label {
+text-align: left;
+font-size: 14px;
+font-weight: 600;
+color: #334155;
+}
+
+.userFormField input,
+.userFormField select {
+width: 100%;
+height: 42px;
+box-sizing: border-box;
+border: 1px solid #cbd5e1;
+border-radius: 8px;
+padding: 0 12px;
+background: #ffffff;
+font-size: 14px;
+}
+
+.userFormField input:focus,
+.userFormField select:focus {
+outline: none;
+border-color: #2563eb;
+box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+}
+
+
+/* ===============================
+Permissions
+================================ */
+
+.userFormField:has(.permissionCheckboxGroup) {
+grid-column: 1 / -1;
+}
+
+.permissionCheckboxGroup {
+display: grid;
+grid-template-columns: repeat(4, 1fr);
+gap: 10px;
+margin-top: 4px;
+}
+
+.permissionCheckbox {
+display: flex;
+align-items: center;
+gap: 8px;
+padding: 10px 12px;
+background: #f8fafc;
+border: 1px solid #e2e8f0;
+border-radius: 8px;
+cursor: pointer;
+}
+
+.permissionCheckbox:hover {
+background: #eff6ff;
+border-color: #93c5fd;
+}
+
+.permissionCheckbox input {
+width: 16px;
+height: 16px;
+margin: 0;
+}
+
+.permissionCheckbox span {
+font-size: 13px;
+color: #334155;
+}
+
+
+/* ===============================
+Error
+================================ */
+
+.userFormError {
+grid-column: 1 / -1;
+background: #fee2e2;
+color: #b91c1c;
+padding: 10px 12px;
+border-radius: 8px;
+font-size: 13px;
+}
+
+
+/* ===============================
+Buttons
+================================ */
+
+.addUserFormButtons {
+grid-column: 1 / -1;
+display: flex;
+justify-content: flex-end;
+gap: 10px;
+margin-top: 6px;
+padding-top: 16px;
+border-top: 1px solid #e5e7eb;
+}
+
+.cancelUserButton,
+.saveUserButton {
+min-width: 110px;
+height: 40px;
+border: none;
+border-radius: 8px;
+font-weight: 600;
+cursor: pointer;
+}
+
+.cancelUserButton {
+background: #e2e8f0;
+color: #334155;
+}
+
+.cancelUserButton:hover {
+background: #cbd5e1;
+}
+
+.saveUserButton {
+background: #2563eb;
+color: white;
+}
+
+.saveUserButton:hover {
+background: #1d4ed8;
+}
+
+.saveUserButton:disabled {
+background: #94a3b8;
+cursor: not-allowed;
+}
+
+
+/* ===============================
+Responsive
+================================ */
+
+@media (max-width: 768px) {
+.addUserPanel {
+margin: 12px;
+padding: 18px;
+}
+
+.addUserForm {
+grid-template-columns: 1fr;
+}
+
+.permissionCheckboxGroup {
+grid-template-columns: repeat(2, 1fr);
+}
+
+.userFormField:has(.permissionCheckboxGroup),
+.addUserFormButtons,
+.userFormError {
+grid-column: 1;
+}
 }
