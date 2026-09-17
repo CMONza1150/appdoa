@@ -2771,3 +2771,92 @@ font-size: 20px;
   }
 
 }
+
+/* ===== Fix Assignee Dropdown Overflow ===== */
+
+.workTable td:nth-child(3) {
+  position: relative;
+  overflow: hidden !important;
+}
+
+/* ===== Assignee Search ===== */
+
+.assigneeSearch {
+  position: relative;
+  width: 100%;
+  min-width: 0;
+}
+
+.assigneeSearchInput {
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+/* ===== Assignee Dropdown ===== */
+
+.assigneeDropdown {
+  position: absolute;
+  top: calc(100% + 5px);
+  left: 0;
+
+  width: 100%;
+  min-width: 220px;
+  max-width: 260px;
+
+  max-height: 250px;
+
+  overflow-y: auto;
+
+  background: white;
+
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.18);
+
+  z-index: 9999;
+}
+
+/* ===== Fix Status Column ===== */
+
+.statusColumn {
+  width: 160px;
+  min-width: 160px;
+  max-width: 160px;
+}
+
+/* ===== Status With Comment ===== */
+
+.statusWithComment {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  gap: 6px;
+  flex-wrap: wrap;
+
+  white-space: normal;
+}
+
+/* ===== Status Badge ===== */
+
+.status-badge {
+  min-width: 90px;
+
+  padding: 5px 10px;
+
+  font-size: 13px;
+
+  white-space: nowrap;
+}
+
+/* ===== Comment Badge & Menu ===== */
+
+.commentCountBadge {
+  flex-shrink: 0;
+}
+
+.commentMenuButton {
+  flex-shrink: 0;
+}
