@@ -2860,3 +2860,144 @@ font-size: 20px;
 .commentMenuButton {
   flex-shrink: 0;
 }
+
+
+
+/* =====================================
+   FINAL RESPONSIVE CONTROL
+   แยก Localhost / PC / iPad / Mobile
+   ===================================== */
+
+
+/* ===== LOCALHOST DEFAULT ===== */
+
+.workTable {
+  width: 1500px;
+  min-width: 1500px;
+}
+
+
+/* ===== PC DESKTOP ===== */
+
+@media (min-width: 1200px) {
+
+  .tableWrapper {
+    overflow-x: hidden;
+  }
+
+  .workTable {
+    width: 100% !important;
+    min-width: 100% !important;
+
+    table-layout: fixed;
+  }
+
+  .workTable th:nth-child(1),
+  .workTable td:nth-child(1) {
+    width: 7%;
+  }
+
+  .workTable th:nth-child(2),
+  .workTable td:nth-child(2) {
+    width: 12%;
+  }
+
+  .workTable th:nth-child(3),
+  .workTable td:nth-child(3) {
+    width: 15%;
+  }
+
+  .workTable th:nth-child(4),
+  .workTable td:nth-child(4) {
+    width: 25%;
+  }
+
+  .workTable th:nth-child(5),
+  .workTable td:nth-child(5) {
+    width: 12%;
+  }
+
+  .workTable th:nth-child(6),
+  .workTable td:nth-child(6) {
+    width: 10%;
+  }
+
+  .workTable th:nth-child(7),
+  .workTable td:nth-child(7) {
+    width: 14%;
+  }
+
+  .workTable th:nth-child(8),
+  .workTable td:nth-child(8) {
+    width: 5%;
+  }
+
+  .assigneeSearchInput {
+    min-width: 0;
+  }
+
+  .statusWithComment {
+    flex-wrap: nowrap;
+  }
+
+}
+
+
+/* ===== IPAD ===== */
+
+@media (min-width: 769px) and (max-width: 1199px) {
+
+  .tableWrapper {
+    overflow-x: auto;
+  }
+
+  .workTable {
+    width: 1500px !important;
+    min-width: 1500px !important;
+  }
+
+  .assigneeSearchInput {
+    width: 190px;
+  }
+
+  .statusColumn {
+    width: 180px;
+  }
+
+}
+
+
+/* ===== MOBILE ===== */
+
+@media (max-width: 768px) {
+
+  .tableWrapper {
+    overflow-x: auto !important;
+  }
+
+  .workTable {
+    width: 1500px !important;
+    min-width: 1500px !important;
+  }
+
+  .workTable th,
+  .workTable td {
+    font-size: 14px;
+    white-space: normal;
+  }
+
+  .assigneeSearchInput {
+    width: 100%;
+    min-width: 190px;
+  }
+
+  .assigneeDropdown {
+    width: 230px;
+    max-width: 230px;
+  }
+
+  .statusWithComment {
+    flex-wrap: nowrap;
+  }
+
+}
