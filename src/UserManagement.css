@@ -324,15 +324,33 @@
 }
 
 .userTableWrapper {
+  width: 100%;
   background: #ffffff;
   border-radius: 14px;
-  overflow: hidden;
+
+  overflow-x: auto;
+  overflow-y: hidden;
+
   box-shadow: 0 4px 18px rgba(0, 0, 0, 0.08);
+
+  -webkit-overflow-scrolling: touch;
 }
 
 .userTable {
   width: 100%;
+  min-width: 950px;
+
   border-collapse: collapse;
+}
+
+@media (max-width: 768px) {
+  .userTableWrapper {
+    overflow-x: auto;
+  }
+
+  .userTable {
+    min-width: 950px;
+  }
 }
 
 .userTable thead {

@@ -695,8 +695,8 @@ body {
   }
 
   .workTable {
-    width: 100%;
-    min-width: 1050px;
+    width: 1100px;
+    min-width: 1100px;
     table-layout: fixed;
   }
 
@@ -741,6 +741,52 @@ body {
   .workTable th {
     white-space: nowrap;
   }
+
+  @media (max-width: 768px) {
+
+  .workTable th:nth-child(1),
+  .workTable td:nth-child(1) {
+    width: 80px;
+  }
+
+  .workTable th:nth-child(2),
+  .workTable td:nth-child(2) {
+    width: 150px;
+  }
+
+  .workTable th:nth-child(3),
+  .workTable td:nth-child(3) {
+    width: 220px;
+  }
+
+  .workTable th:nth-child(4),
+  .workTable td:nth-child(4) {
+    width: 300px;
+  }
+
+  .workTable th:nth-child(5),
+  .workTable td:nth-child(5) {
+    width: 130px;
+  }
+
+  .workTable th:nth-child(6),
+  .workTable td:nth-child(6) {
+    width: 130px;
+  }
+
+  .workTable th:nth-child(7),
+  .workTable td:nth-child(7) {
+    width: 250px;
+  }
+
+  .workTable td {
+    white-space: normal;
+    word-break: break-word;
+  }
+
+}
+
+
 
   /* เอกสารแนบ */
   .attachment-cell {
@@ -2175,4 +2221,12 @@ font-size: 20px;
 .attachmentUploadButton.uploading {
   opacity: 0.55;
   cursor: wait;
+}
+
+.assigneeSearchInput {
+  max-width: 180px;
+}
+
+.assigneeSearch {
+  overflow: hidden;
 }
