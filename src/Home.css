@@ -1463,6 +1463,8 @@ body,
 
 .workTable tbody tr:hover {
   background: #f8fafc;
+  position: relative;
+  z-index: 10;
 }
 
 /* จัดตำแหน่งบางคอลัมน์ให้อยู่ตรงกลาง */
@@ -2223,10 +2225,346 @@ font-size: 20px;
   cursor: wait;
 }
 
-.assigneeSearchInput {
-  max-width: 180px;
+
+
+/* ===== Final Table Width Fix ===== */
+
+.workTable {
+  width: 1500px;
+  min-width: 1500px;
+  table-layout: fixed;
 }
 
+.workTable th:nth-child(1),
+.workTable td:nth-child(1) {
+  width: 80px;
+}
+
+.workTable th:nth-child(2),
+.workTable td:nth-child(2) {
+  width: 150px;
+}
+
+.workTable th:nth-child(3),
+.workTable td:nth-child(3) {
+  width: 220px;
+}
+
+.workTable th:nth-child(4),
+.workTable td:nth-child(4) {
+  width: 320px;
+}
+
+.workTable th:nth-child(5),
+.workTable td:nth-child(5) {
+  width: 140px;
+}
+
+.workTable th:nth-child(6),
+.workTable td:nth-child(6) {
+  width: 130px;
+}
+
+.workTable th:nth-child(7),
+.workTable td:nth-child(7) {
+  width: 300px;
+}
+
+.workTable th:nth-child(8),
+.workTable td:nth-child(8) {
+  width: 120px;
+}
+
+.workTable td {
+  white-space: normal;
+  word-break: break-word;
+  overflow-wrap: break-word;
+}
+
+/* ===== Assignee Search ===== */
+
 .assigneeSearch {
+  position: relative;
+  width: 100%;
+  z-index: 50;
+}
+
+.assigneeDropdown {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+
+  width: 100%;
+  min-width: 220px;
+  max-height: 250px;
+
+  overflow-y: auto;
+
+  background: white;
+
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+
+  z-index: 9999;
+}
+
+
+
+.workTable th:nth-child(3),
+.workTable td:nth-child(3) {
+  width: 220px;
+  min-width: 220px;
+  max-width: 220px;
+}
+
+.assigneeSearchInput {
+  width: 100%;
+  min-width: 190px;
+}
+
+/* ===== Assignee Dropdown Final ===== */
+
+.assigneeSearch {
+  position: relative;
+  width: 100%;
+}
+
+.assigneeSearchInput {
+  width: 100%;
+}
+
+.assigneeDropdown {
+  position: absolute;
+  top: calc(100% + 5px);
+  left: 0;
+
+  width: 230px;
+  max-height: 250px;
+
+  overflow-y: auto;
+
+  background: white;
+
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+
+  z-index: 9999;
+}
+
+/* ===== ให้เฉพาะช่องชื่อผู้ปฏิบัติงานเปิด Dropdown ได้ ===== */
+
+.workTable td:nth-child(3) {
+  position: relative;
+  overflow: visible;
+}
+
+/* ===== ช่องอื่นไม่ให้ทะลุ ===== */
+
+.workTable td:not(:nth-child(3)) {
   overflow: hidden;
+}
+
+/* ===== FIX ASSIGNEE DROPDOWN ===== */
+
+.workTable {
+  overflow: visible;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+.tableBox {
+  overflow: visible !important;
+}
+
+.tableWrapper {
+  overflow-x: auto !important;
+  overflow-y: visible !important;
+}
+
+/* ===== Table Row ===== */
+
+.workTable tbody tr {
+  position: relative;
+}
+
+.workTable td:nth-child(3) {
+  position: relative;
+  overflow: visible !important;
+}
+
+/* ===== ช่องค้นหาผู้ปฏิบัติงาน ===== */
+
+.assigneeSearch {
+  position: relative;
+  width: 100%;
+  min-width: 190px;
+
+  z-index: 9999;
+}
+
+/* ===== Dropdown ===== */
+
+.assigneeDropdown {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+
+  width: 230px;
+  max-height: 260px;
+
+  overflow-y: auto;
+
+  background: white;
+
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.18);
+
+  z-index: 999999 !important;
+}
+
+/* ===== เวลาเปิด Dropdown ให้แถวนี้อยู่บนสุด ===== */
+
+.workTable tbody tr:has(.assigneeDropdown) {
+  z-index: 99999;
+}
+
+/* ===== รายชื่อ ===== */
+
+.assigneeOption {
+  width: 100%;
+
+  padding: 10px 12px;
+
+  background: white;
+
+  border: none;
+  border-bottom: 1px solid #e5e7eb;
+
+  text-align: left;
+
+  cursor: pointer;
+
+  color: #1f2937;
+}
+
+.assigneeOption:hover {
+  background: #eff6ff;
+}
+
+/* ===== ไม่พบรายชื่อ ===== */
+
+.assigneeNoResult {
+  padding: 12px;
+
+  text-align: center;
+
+  color: #64748b;
+}
+
+
+/* ===== Fix Comment 3 Dots Button ===== */
+
+.statusWithComment {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  gap: 8px;
+
+  white-space: nowrap;
+  overflow: visible !important;
+}
+
+/* ===== Comment Menu Button ===== */
+
+.commentMenuButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 28px;
+  height: 28px;
+
+  padding: 0;
+
+  border: none;
+  border-radius: 6px;
+
+  background: transparent;
+  color: #334155;
+
+  font-size: 22px;
+  line-height: 1;
+
+  cursor: pointer;
+
+  flex-shrink: 0;
+}
+
+.commentMenuButton:hover {
+  background: #e2e8f0;
+}
+
+/* ===== กัน Column สถานะตัด Icon ===== */
+
+.workTable th:nth-child(5),
+.workTable td:nth-child(5) {
+  width: 180px;
+  min-width: 180px;
+  max-width: 180px;
+
+  overflow: visible !important;
+
+  text-align: center;
+}
+
+/* ===== กัน Table ซ่อน Icon ===== */
+
+.workTable td {
+  overflow: visible;
+}
+
+.tableWrapper {
+  overflow-x: auto;
+  overflow-y: visible;
+}
+
+.tableBox {
+  overflow: visible;
+}
+
+/* ===== Expand Attachment Column ===== */
+
+.workTable th:nth-child(8),
+.workTable td:nth-child(8),
+.attachmentColumn,
+.attachment-cell {
+  width: 150px;
+  min-width: 150px;
+  max-width: 150px;
+
+  text-align: center;
+  vertical-align: middle;
+}
+
+/* ===== ปุ่มในช่องเอกสารแนบ ===== */
+
+.attachmentActions {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  gap: 8px;
+  flex-wrap: nowrap;
+}
+
+.attachmentViewButton,
+.attachmentUploadButton {
+  white-space: nowrap;
 }

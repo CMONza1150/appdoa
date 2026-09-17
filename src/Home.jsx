@@ -230,8 +230,14 @@ function loadUserOptions() {
     .then((data) => {
       if (data.success) {
         const activeUsers = (data.users || []).filter(
-          (item) => item.active === true
-        );
+  (item) =>
+    item.active === true ||
+    item.active === "TRUE" ||
+    item.active === "true"
+);
+
+setUserOptions(activeUsers);
+console.log("users:", activeUsers);
 
         setUserOptions(activeUsers);
       }
