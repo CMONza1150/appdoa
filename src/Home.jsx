@@ -80,106 +80,6 @@ const DEPARTMENT_MENUS = [
   },
 ];
 
-function AssigneeSelect({
-  value,
-  users,
-  onSelect,
-}) {
-  const [open, setOpen] = useState(false);
-  const [search, setSearch] = useState(value || "");
-
-  useEffect(() => {
-    setSearch(value || "");
-  }, [value]);
-
-  const filteredUsers = users.filter((item) => {
-    const keyword = search
-      .trim()
-      .toLowerCase();
-
-    if (!keyword) {
-      return true;
-    }
-
-    return String(item.name || "")
-      .toLowerCase()
-      .includes(keyword);
-  });
-
-  return (
-    <div className="assigneeSearch">
-      <input
-        type="text"
-        className="assigneeSearchInput"
-        placeholder="ค้นหาชื่อผู้ปฏิบัติงาน"
-        value={search}
-        onFocus={() => {
-          setOpen(true);
-
-          if (search === value) {
-            setSearch("");
-          }
-        }}
-        onChange={(event) => {
-          setSearch(event.target.value);
-          setOpen(true);
-        }}
-        onBlur={() => {
-          setTimeout(() => {
-            setOpen(false);
-
-            if (!search) {
-              setSearch(value || "");
-            }
-          }, 150);
-        }}
-      />
-
-      {open && (
-        <div className="assigneeDropdown">
-          <button
-            type="button"
-            className="assigneeOption empty"
-            onMouseDown={(event) =>
-              event.preventDefault()
-            }
-            onClick={() => {
-              onSelect("");
-              setSearch("");
-              setOpen(false);
-            }}
-          >
-            ยังไม่ได้มอบหมาย
-          </button>
-
-          {filteredUsers.length > 0 ? (
-            filteredUsers.map((item) => (
-              <button
-                type="button"
-                key={item.username}
-                className="assigneeOption"
-                onMouseDown={(event) =>
-                  event.preventDefault()
-                }
-                onClick={() => {
-                  onSelect(item.name);
-                  setSearch(item.name);
-                  setOpen(false);
-                }}
-              >
-                {item.name}
-              </button>
-            ))
-          ) : (
-            <div className="assigneeNoResult">
-              ไม่พบผู้ใช้งาน
-            </div>
-          )}
-        </div>
-      )}
-    </div>
-  );
-}
 
 
 
@@ -215,6 +115,14 @@ function Home({user, onLogout}) {
     const [selectedLink, setSelectedLink] = useState(null);
     
     const [userOptions, setUserOptions] = useState([]);
+    const [assigneeModalOpen, setAssigneeModalOpen] = useState(false);
+
+    const [selectedAssignees, setSelectedAssignees] = useState([]);
+
+    const [currentAssigneeRow, setCurrentAssigneeRow] = useState(null);
+
+    const [assigneeSearch, setAssigneeSearch] = useState("");
+
     const [uploadingAttachment, setUploadingAttachment] = useState("");
     
     //date sql filter
@@ -723,6 +631,49 @@ function getCommentCount(comment) {
 }
 
 
+function openAssigneeModal(row) {
+  const current = row.ชื่อผู้ปฏิบัติงาน
+    ? row.ชื่อผู้ปฏิบัติงาน
+        .split(",")
+        .map((x) => x.trim())
+        .filter(Boolean)
+    : [];
+
+  setCurrentAssigneeRow(row);
+  setSelectedAssignees(current);
+  setAssigneeSearch("");
+  setAssigneeModalOpen(true);
+}
+
+function toggleAssignee(name) {
+  setSelectedAssignees((current) => {
+    if (current.includes(name)) {
+      return current.filter(
+        (item) => item !== name
+      );
+    }
+
+    return [
+      ...current,
+      name
+    ];
+  });
+}
+
+
+function saveMultipleAssignee() {
+  const names = selectedAssignees.join(", ");
+
+  updateAssignee(
+    currentAssigneeRow,
+    names
+  );
+
+  setAssigneeModalOpen(false);
+}
+
+
+
 async function uploadAttachment(row, file) {
   if (!file) {
     return;
@@ -800,6 +751,7 @@ async function uploadAttachment(row, file) {
     setUploadingAttachment("");
   }
 }
+
 
 
 async function updateAssignee(row, assignee) {
@@ -1717,13 +1669,14 @@ className="budgetDashboardFrame"
               <td>{row.เลขรับ}</td>
               <td>{row.เจ้าของเรื่อง || "-"}</td>
               <td>
-  <AssigneeSelect
-    value={row.ชื่อผู้ปฏิบัติงาน || ""}
-    users={userOptions}
-    onSelect={(name) =>
-      updateAssignee(row, name)
-    }
-  />
+  <button
+    className="assigneePickerButton"
+    onClick={() => openAssigneeModal(row)}
+  >
+    {row.ชื่อผู้ปฏิบัติงาน
+      ? row.ชื่อผู้ปฏิบัติงาน
+      : "เลือกผู้ปฏิบัติงาน"}
+  </button>
 </td>
               <td>{row.เรื่อง}</td>
              
@@ -1842,6 +1795,129 @@ className="budgetDashboardFrame"
     )}
     </>
     )}
+
+  {assigneeModalOpen && (
+  <div
+    className="assigneeModalOverlay"
+    onClick={() => setAssigneeModalOpen(false)}
+  >
+    <div
+      className="assigneeModal"
+      onClick={(e) => e.stopPropagation()}
+    >
+      {/* ===== Modal Header ===== */}
+
+      <div className="assigneeModalHeader">
+        <div>
+          <h3>เลือกผู้ปฏิบัติงาน</h3>
+
+          <p className="assigneeModalSubtext">
+            เลือกได้หลายคน
+          </p>
+        </div>
+
+        <button
+          type="button"
+          className="assigneeCloseButton"
+          onClick={() => setAssigneeModalOpen(false)}
+        >
+          ×
+        </button>
+      </div>
+
+      {/* ===== Search ===== */}
+
+      <div className="assigneeModalSearchWrap">
+        <input
+          className="assigneeModalSearch"
+          placeholder="ค้นหาชื่อ"
+          value={assigneeSearch}
+          onChange={(e) => setAssigneeSearch(e.target.value)}
+        />
+      </div>
+
+      {/* ===== Selected Count ===== */}
+
+      <div className="assigneeSelectedCount">
+        เลือกแล้ว {selectedAssignees.length} คน
+      </div>
+
+      {/* ===== Assignee List ===== */}
+
+      <div className="assigneeModalList">
+
+        {/* ยังไม่ได้มอบหมาย */}
+
+        <label className="assigneeOptionRow clearOption">
+          <input
+            type="checkbox"
+            checked={selectedAssignees.length === 0}
+            onChange={() => setSelectedAssignees([])}
+          />
+
+          <span>ยังไม่ได้มอบหมาย</span>
+        </label>
+
+        {/* รายชื่อผู้ปฏิบัติงาน */}
+
+        {userOptions
+          .filter((user) =>
+            String(user.name || "")
+              .toLowerCase()
+              .includes(assigneeSearch.toLowerCase())
+          )
+          .map((user) => (
+            <label
+              key={user.username}
+              className={
+                selectedAssignees.includes(user.name)
+                  ? "assigneeOptionRow selected"
+                  : "assigneeOptionRow"
+              }
+            >
+              <input
+                type="checkbox"
+                checked={selectedAssignees.includes(user.name)}
+                onChange={() => toggleAssignee(user.name)}
+              />
+
+              <div className="assigneeOptionText">
+                <span className="assigneeOptionName">
+                  {user.name}
+                </span>
+
+                <span className="assigneeOptionUsername">
+                  {user.username}
+                </span>
+              </div>
+            </label>
+          ))}
+
+      </div>
+
+      {/* ===== Modal Footer ===== */}
+
+      <div className="assigneeModalFooter">
+        <button
+          type="button"
+          className="assigneeCancelButton"
+          onClick={() => setAssigneeModalOpen(false)}
+        >
+          ยกเลิก
+        </button>
+
+        <button
+          type="button"
+          className="assigneeSaveButton"
+          onClick={saveMultipleAssignee}
+        >
+          บันทึก
+        </button>
+      </div>
+
+    </div>
+  </div>
+)}
 
     {commentRow && (
   <div
