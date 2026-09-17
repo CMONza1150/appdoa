@@ -3091,6 +3091,37 @@ font-size: 20px;
   .sidebar {
     padding-top: 84px;
   }
+
+  @media (max-width: 1024px) {
+  .sidebar {
+    position: fixed;
+
+    top: 0;
+    left: -280px;
+
+    width: 270px;
+    min-width: 270px;
+
+    height: 100dvh;
+
+    z-index: 9000;
+
+    transition: left 0.25s ease;
+  }
+
+  .sidebar.open {
+    left: 0;
+
+    box-shadow: 8px 0 25px rgba(0, 0, 0, 0.3);
+  }
+
+  .content {
+    width: 100%;
+
+    margin: 0 !important;
+    padding: 80px 20px 30px;
+  }
+}
 }
 
 /* ==========================
