@@ -2568,3 +2568,105 @@ font-size: 20px;
 .attachmentUploadButton {
   white-space: nowrap;
 }
+
+/* ===== Fix Mobile Table Horizontal Scroll ===== */
+
+@media (max-width: 768px) {
+
+  /* ===== Table Box ===== */
+
+  .tableBox {
+    width: 100%;
+    overflow: visible !important;
+  }
+
+  /* ===== Table Wrapper ===== */
+
+  .tableWrapper {
+    display: block;
+
+    width: 100%;
+
+    overflow-x: auto !important;
+    overflow-y: hidden;
+
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* ===== Work Table ===== */
+
+  .workTable {
+    width: 1500px !important;
+    min-width: 1500px !important;
+
+    table-layout: fixed;
+    border-collapse: separate;
+  }
+
+  .workTable th,
+  .workTable td {
+    padding: 10px;
+
+    font-size: 14px;
+
+    white-space: normal;
+    word-break: break-word;
+  }
+
+  /* ===== เลขรับ ===== */
+
+  .workTable th:nth-child(1),
+  .workTable td:nth-child(1) {
+    width: 80px !important;
+  }
+
+  /* ===== เจ้าของเรื่อง ===== */
+
+  .workTable th:nth-child(2),
+  .workTable td:nth-child(2) {
+    width: 150px !important;
+  }
+
+  /* ===== ผู้ปฏิบัติงาน ===== */
+
+  .workTable th:nth-child(3),
+  .workTable td:nth-child(3) {
+    width: 220px !important;
+  }
+
+  /* ===== เรื่อง ===== */
+
+  .workTable th:nth-child(4),
+  .workTable td:nth-child(4) {
+    width: 320px !important;
+  }
+
+  /* ===== สถานะ ===== */
+
+  .workTable th:nth-child(5),
+  .workTable td:nth-child(5) {
+    width: 140px !important;
+  }
+
+  /* ===== วันที่กำหนดส่ง ===== */
+
+  .workTable th:nth-child(6),
+  .workTable td:nth-child(6) {
+    width: 130px !important;
+  }
+
+  /* ===== หมายเหตุ ===== */
+
+  .workTable th:nth-child(7),
+  .workTable td:nth-child(7) {
+    width: 300px !important;
+  }
+
+  /* ===== เอกสารแนบ ===== */
+
+  .workTable th:nth-child(8),
+  .workTable td:nth-child(8) {
+    width: 150px !important;
+  }
+
+}
