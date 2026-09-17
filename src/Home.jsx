@@ -1,6 +1,7 @@
 import { useEffect, useRef ,useState ,useMemo} from "react";
 import "./Home.css";
 import UserManagement from "./UserManagement";
+import LinkManagement from "./LinkManagement";
 import {
   PieChart,
   Pie,
@@ -79,6 +80,110 @@ const DEPARTMENT_MENUS = [
   },
 ];
 
+function AssigneeSelect({
+  value,
+  users,
+  onSelect,
+}) {
+  const [open, setOpen] = useState(false);
+  const [search, setSearch] = useState(value || "");
+
+  useEffect(() => {
+    setSearch(value || "");
+  }, [value]);
+
+  const filteredUsers = users.filter((item) => {
+    const keyword = search
+      .trim()
+      .toLowerCase();
+
+    if (!keyword) {
+      return true;
+    }
+
+    return String(item.name || "")
+      .toLowerCase()
+      .includes(keyword);
+  });
+
+  return (
+    <div className="assigneeSearch">
+      <input
+        type="text"
+        className="assigneeSearchInput"
+        placeholder="ค้นหาชื่อผู้ปฏิบัติงาน"
+        value={search}
+        onFocus={() => {
+          setOpen(true);
+
+          if (search === value) {
+            setSearch("");
+          }
+        }}
+        onChange={(event) => {
+          setSearch(event.target.value);
+          setOpen(true);
+        }}
+        onBlur={() => {
+          setTimeout(() => {
+            setOpen(false);
+
+            if (!search) {
+              setSearch(value || "");
+            }
+          }, 150);
+        }}
+      />
+
+      {open && (
+        <div className="assigneeDropdown">
+          <button
+            type="button"
+            className="assigneeOption empty"
+            onMouseDown={(event) =>
+              event.preventDefault()
+            }
+            onClick={() => {
+              onSelect("");
+              setSearch("");
+              setOpen(false);
+            }}
+          >
+            ยังไม่ได้มอบหมาย
+          </button>
+
+          {filteredUsers.length > 0 ? (
+            filteredUsers.map((item) => (
+              <button
+                type="button"
+                key={item.username}
+                className="assigneeOption"
+                onMouseDown={(event) =>
+                  event.preventDefault()
+                }
+                onClick={() => {
+                  onSelect(item.name);
+                  setSearch(item.name);
+                  setOpen(false);
+                }}
+              >
+                {item.name}
+              </button>
+            ))
+          ) : (
+            <div className="assigneeNoResult">
+              ไม่พบผู้ใช้งาน
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+
+
+
 function Home({user, onLogout}) {
     const [menuOpen, setMenuOpen] = useState(false);
     const [department, setDepartment] = useState("ทั้งหมด");
@@ -105,6 +210,12 @@ function Home({user, onLogout}) {
 
     const [departmentView, setDepartmentView] = useState("work");
     const [openDepartmentMenu, setOpenDepartmentMenu] = useState("");
+
+    const [departmentLinks, setDepartmentLinks] = useState([]);
+    const [selectedLink, setSelectedLink] = useState(null);
+    
+    const [userOptions, setUserOptions] = useState([]);
+    const [uploadingAttachment, setUploadingAttachment] = useState("");
     
     //date sql filter
     const [passengerStartDate, setPassengerStartDate] = useState("");
@@ -113,6 +224,31 @@ function Home({user, onLogout}) {
     const [selectedAirport, setSelectedAirport] = useState("ทั้งหมด");
     const [passengerView, setPassengerView] = useState("day"); // "chart" หรือ "table"
    
+function loadUserOptions() {
+  fetch(`${API_URLS}?action=listUsers`)
+    .then((res) => res.json())
+    .then((data) => {
+      if (data.success) {
+        const activeUsers = (data.users || []).filter(
+          (item) => item.active === true
+        );
+
+        setUserOptions(activeUsers);
+      }
+    })
+    .catch((error) => {
+      console.error(
+        "Load users error:",
+        error
+      );
+    });
+}
+
+function openLinkDashboard(link) {
+  setSelectedLink(link);
+  setMenu("dashboard");
+}
+
 function toggleDepartmentMenu(name) {
   setOpenDepartmentMenu((current) =>
     current === name ? "" : name
@@ -125,6 +261,7 @@ function selectDepartmentView(name, view) {
   setSelectedPage("dashboard");
   setMenu("dashboard");
   setMenuOpen(false);
+  setSelectedLink(null);
 }
 
 function hasPermission(permission) {
@@ -328,6 +465,7 @@ const airportOptions = useMemo(() => {return [
     const filteredRows = dateFilteredRows.filter((row) => {
   const keyword = searchText.trim().toLowerCase();
 
+
   const matchesSearch =
     !keyword ||
     String(row.เลขรับ || "").toLowerCase().includes(keyword) ||
@@ -358,6 +496,19 @@ function loadSheetOptions() {
     })
     .catch((error) => {
       console.error("Load sheet options error:", error);
+    });
+}
+
+function loadDepartmentLinks() {
+  fetch(`${API_URLS}?action=listLinks`)
+    .then((res) => res.json())
+    .then((data) => {
+      if (data.success) {
+        setDepartmentLinks(data.links);
+      }
+    })
+    .catch((error) => {
+      console.error("Load links error:", error);
     });
 }
    
@@ -564,6 +715,132 @@ function getCommentCount(comment) {
 
   return matches ? matches.length : 0;
 }
+
+
+async function uploadAttachment(row, file) {
+  if (!file) {
+    return;
+  }
+
+  try {
+    setUploadingAttachment(row.เลขรับ);
+
+    const base64Data = await new Promise(
+      (resolve, reject) => {
+        const reader = new FileReader();
+
+        reader.onload = () => {
+          const result = String(
+            reader.result || ""
+          );
+
+          const base64 =
+            result.split(",")[1] || "";
+
+          resolve(base64);
+        };
+
+        reader.onerror = reject;
+
+        reader.readAsDataURL(file);
+      }
+    );
+
+    const response = await fetch(API_URLS, {
+      method: "POST",
+      body: JSON.stringify({
+        action: "uploadAttachment",
+        sheet: selectedSheet,
+        receiveNumber: row.เลขรับ,
+        fileName: file.name,
+        mimeType:
+          file.type ||
+          "application/octet-stream",
+        base64Data: base64Data,
+      }),
+    });
+
+    const result = await response.json();
+
+    if (!result.success) {
+      alert(
+        result.message ||
+          "อัปโหลดเอกสารไม่สำเร็จ"
+      );
+
+      return;
+    }
+
+    setAllRows((currentRows) =>
+      currentRows.map((item) =>
+        item.เลขรับ === row.เลขรับ
+          ? {
+              ...item,
+              เอกสารแนบ: result.url,
+            }
+          : item
+      )
+    );
+
+    alert("อัปโหลดเอกสารสำเร็จ");
+  } catch (error) {
+    console.error(
+      "Upload attachment error:",
+      error
+    );
+
+    alert("อัปโหลดเอกสารไม่สำเร็จ");
+  } finally {
+    setUploadingAttachment("");
+  }
+}
+
+
+async function updateAssignee(row, assignee) {
+  try {
+    const response = await fetch(API_URLS, {
+      method: "POST",
+      body: JSON.stringify({
+        action: "updateAssignee",
+        sheet: selectedSheet,
+        receiveNumber: row.เลขรับ,
+        assignee: assignee,
+      }),
+    });
+
+    const result = await response.json();
+
+    if (!result.success) {
+      alert(
+        result.message ||
+          "บันทึกผู้ปฏิบัติงานไม่สำเร็จ"
+      );
+
+      return;
+    }
+
+    setAllRows((currentRows) =>
+      currentRows.map((item) =>
+        item.เลขรับ === row.เลขรับ
+          ? {
+              ...item,
+              ชื่อผู้ปฏิบัติงาน: assignee,
+            }
+          : item
+      )
+    );
+  } catch (error) {
+    console.error(
+      "Update assignee error:",
+      error
+    );
+
+    alert("บันทึกผู้ปฏิบัติงานไม่สำเร็จ");
+  }
+}
+
+
+
 //comment//
 async function saveComment() {
   if (!commentRow) {
@@ -613,6 +890,15 @@ async function saveComment() {
   }
 }
 
+  function getDepartmentLinks(permission) {
+  return departmentLinks.filter((link) => {
+    return (
+      link.permission.includes("all") ||
+      link.permission.includes(permission)
+    );
+  });
+}
+
   // Load passenger data from SQL Server
    async function loadPassengerData() {
   try {
@@ -653,6 +939,9 @@ async function saveComment() {
   }
 }, [department, gwsSource]);
 
+useEffect(() => {
+  loadUserOptions();
+}, []);
 
 useEffect(() => {
   if (!user) {
@@ -693,7 +982,10 @@ useEffect(() => {
 }, [user]);
 
 
-    
+    useEffect(() => {
+      loadDepartmentLinks();
+    }, []);
+
     useEffect(() => {
       loadSheetOptions();
     }, []);
@@ -745,9 +1037,12 @@ useEffect(() => {
         : "menu"
     }
     onClick={() => {
+      setSelectedLink(null);
       setDepartment("ทั้งหมด");
+      setDepartmentView("work");
       setSelectedPage("dashboard");
       setMenu("dashboard");
+      setOpenDepartmentMenu("");
       setMenuOpen(false);
     }}
   >
@@ -789,42 +1084,64 @@ useEffect(() => {
       </button>
 
       {isOpen && (
-        <div className="departmentSubmenu">
-          <button
-            className={
-              department === item.name &&
-              departmentView === "work"
-                ? "submenuButton active"
-                : "submenuButton"
-            }
-            onClick={() =>
-              selectDepartmentView(
-                item.name,
-                "work"
-              )
-            }
-          >
-            ติดตามงาน
-          </button>
+  <div className="departmentSubmenu">
+    <button
+      className={
+        department === item.name &&
+        departmentView === "work"
+          ? "submenuButton active"
+          : "submenuButton"
+      }
+      onClick={() =>
+        selectDepartmentView(
+          item.name,
+          "work"
+        )
+      }
+    >
+      ติดตามงาน
+    </button>
 
-          <button
-            className={
-              department === item.name &&
-              departmentView === "budget"
-                ? "submenuButton active"
-                : "submenuButton"
-            }
-            onClick={() =>
-              selectDepartmentView(
-                item.name,
-                "budget"
-              )
-            }
-          >
-            ติดตามงบประมาณ
-          </button>
-        </div>
-      )}
+    <button
+      className={
+        department === item.name &&
+        departmentView === "budget"
+          ? "submenuButton active"
+          : "submenuButton"
+      }
+      onClick={() =>
+        selectDepartmentView(
+          item.name,
+          "budget"
+        )
+      }
+    >
+      ติดตามงบประมาณ
+    </button>
+
+    {getDepartmentLinks(item.permission).map(
+      (link) => (
+        
+<button
+  className={
+    selectedLink?.id === link.id
+      ? "submenuButton active"
+      : "submenuButton"
+  }
+  onClick={() => {
+    setSelectedLink(link);
+    setDepartmentView("link");
+    setMenuOpen(false);
+  }}
+>
+  {link.name}
+</button>
+
+
+      )
+    )}
+  </div>
+)}
     </div>
   );
 })}
@@ -846,6 +1163,24 @@ useEffect(() => {
     👥 จัดการผู้ใช้
   </button>
 )}
+
+{user?.role === "admin" && (
+  <button
+    className={
+      menu === "links"
+        ? "menu active"
+        : "menu"
+    }
+    onClick={() => {
+      setMenu("links");
+      setOpenDepartmentMenu("");
+      setMenuOpen(false);
+    }}
+  >
+    🔗 จัดการ Link
+  </button>
+)}
+
 <button
     className="menu logout-menu"
     onClick={onLogout}
@@ -860,23 +1195,47 @@ useEffect(() => {
       {/* Main Content */}
       <main className={'content ${departmentView === "budget" ? "budgetMode" : ""}'}>
 
-      
-
-        {menu === "users" && user?.role === "admin" ? (
-          <UserManagement />
-        ) : (
-          <>
-
-          {departmentView === "budget" && department !== "ทั้งหมด" ? (
-  <div className="budgetDashboardContainer">
-    <iframe
-      src={BUDGET_DASHBOARD_URL}
-      title="Dashboard ติดตามงบประมาณ"
-      className="budgetDashboardFrame"
-    />
-  </div>
+       
+{menu === "users" && user?.role === "admin" ? (
+  <UserManagement />
+) : menu === "links" && user?.role === "admin" ? (
+  <LinkManagement />
 ) : (
   <>
+
+
+{selectedLink ? (
+
+<div className="budgetDashboardContainer">
+
+
+
+<iframe
+src={selectedLink.url}
+title="dashboard"
+className="budgetDashboardFrame"
+/>
+
+</div>
+
+
+) : departmentView === "budget" &&
+department !== "ทั้งหมด" ? (
+
+<div className="budgetDashboardContainer">
+<iframe
+src={BUDGET_DASHBOARD_URL}
+title="Dashboard ติดตามงบประมาณ"
+className="budgetDashboardFrame"
+/>
+</div>
+
+
+) : (
+
+<>
+  
+  
      {department === "กวส." && (
   <div className="gwsSourceSelector">
     <label>แหล่งข้อมูล</label>
@@ -1323,11 +1682,12 @@ useEffect(() => {
         <tr>
           <th>เลขรับ</th>
           <th>เจ้าของเรื่อง</th>
+          <th>ชื่อผู้ปฏิบัติงาน</th>
           <th>เรื่อง</th>
-          <th>สถานะ</th>
-          <th>วันที่กำหนดส่ง</th>
+          <th className="statusColumn">สถานะ</th>
+          <th className="dueDateColumn">วันที่กำหนดส่ง</th>
           <th>หมายเหตุ</th>
-          <th>เอกสารแนบ</th>
+          <th className="attachmentColumn">เอกสารแนบ</th>
         </tr>
       </thead>
 
@@ -1350,9 +1710,18 @@ useEffect(() => {
 >
               <td>{row.เลขรับ}</td>
               <td>{row.เจ้าของเรื่อง || "-"}</td>
+              <td>
+  <AssigneeSelect
+    value={row.ชื่อผู้ปฏิบัติงาน || ""}
+    users={userOptions}
+    onSelect={(name) =>
+      updateAssignee(row, name)
+    }
+  />
+</td>
               <td>{row.เรื่อง}</td>
              
-              <td>
+    <td className="statusColumn">
   <div className="statusWithComment">
     <span
       className={`status-badge ${
@@ -1398,28 +1767,63 @@ useEffect(() => {
     )}
   </div>
 </td>
-              <td>{row.วันที่กำหนดส่ง}</td>
+              <td className="dueDateColumn">
+                {row.วันที่กำหนดส่ง}
+              </td>
               <td>{row.หมายเหตุ}</td>
-              <td className="attachment-cell">
-  {row.เอกสารแนบ ? (
-    <a
-      href={row.เอกสารแนบ}
-      target="_blank"
-      rel="noopener noreferrer"
-      className="attachment-link"
-      title="เปิดเอกสาร"
+             <td className="attachment-cell attachmentColumn">
+  <div className="attachmentActions">
+    {row.เอกสารแนบ && (
+      <a
+        href={row.เอกสารแนบ}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="attachmentViewButton"
+        title="เปิดเอกสาร"
+      >
+        📄 เปิด
+      </a>
+    )}
+
+    <label
+      className={
+        uploadingAttachment === row.เลขรับ
+          ? "attachmentUploadButton uploading"
+          : "attachmentUploadButton"
+      }
     >
-      📄
-    </a>
-  ) : (
-    "-"
-  )}
+      {uploadingAttachment === row.เลขรับ
+        ? "กำลังอัปโหลด..."
+        : row.เอกสารแนบ
+        ? "เปลี่ยนไฟล์"
+        : "+ เพิ่มไฟล์"}
+
+      <input
+        type="file"
+        accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png"
+        hidden
+        disabled={
+          uploadingAttachment === row.เลขรับ
+        }
+        onChange={(event) => {
+          const file =
+            event.target.files?.[0];
+
+          if (file) {
+            uploadAttachment(row, file);
+          }
+
+          event.target.value = "";
+        }}
+      />
+    </label>
+  </div>
 </td>
             </tr>
           ))
         ) : (
           <tr>
-            <td colSpan="7" className="emptyRow">
+            <td colSpan="8" className="emptyRow">
               ยังไม่มีข้อมูลของแผนกนี้
             </td>
           </tr>
