@@ -3013,3 +3013,144 @@ font-size: 20px;
   width: 100px;
   justify-content: center;
 }
+
+
+/* ===============================
+   MOBILE + IPAD MENU BUTTON
+   =============================== */
+
+@media (max-width: 1024px) {
+  .mobile-menu-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+
+    position: fixed;
+    top: 16px;
+    left: 16px;
+    z-index: 5000;
+
+    min-width: 100px;
+    height: 52px;
+    padding: 0 16px;
+
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-radius: 16px;
+
+    background: linear-gradient(135deg, #123f77, #1f5faa);
+    color: #ffffff;
+
+    box-shadow: 0 10px 24px rgba(15, 61, 115, 0.28);
+    backdrop-filter: blur(8px);
+
+    font-size: 18px;
+    font-weight: 700;
+    white-space: nowrap;
+    cursor: pointer;
+
+    transition:
+      transform 0.18s ease,
+      box-shadow 0.18s ease,
+      background 0.18s ease;
+  }
+
+  .mobile-menu-button:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 14px 28px rgba(15, 61, 115, 0.32);
+  }
+
+  .mobile-menu-button:active {
+    transform: scale(0.97);
+  }
+
+  .mobile-menu-button.open {
+    background: linear-gradient(135deg, #b91c1c, #dc2626);
+    box-shadow: 0 10px 24px rgba(185, 28, 28, 0.28);
+  }
+
+  .mobile-menu-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 24px;
+    height: 24px;
+
+    font-size: 24px;
+    line-height: 1;
+    flex-shrink: 0;
+  }
+
+  .mobile-menu-text {
+    font-size: 18px;
+    line-height: 1;
+    letter-spacing: 0.2px;
+  }
+
+  .sidebar {
+    padding-top: 84px;
+  }
+}
+
+/* ==========================
+   FIX PC STATUS COMMENT
+   ========================== */
+
+@media (min-width: 1200px) {
+  .workTable th:nth-child(5),
+  .workTable td:nth-child(5) {
+    width: 180px !important;
+    min-width: 180px !important;
+    max-width: 180px !important;
+
+    text-align: center;
+    vertical-align: middle;
+
+    overflow: visible !important;
+  }
+
+  .statusWithComment {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    gap: 6px;
+
+    white-space: normal;
+  }
+
+  .status-badge {
+    width: fit-content;
+
+    min-width: 110px;
+
+    padding: 6px 10px;
+
+    font-size: 13px;
+
+    white-space: nowrap;
+  }
+
+  .commentCountBadge {
+    display: inline-flex;
+
+    height: 22px;
+    min-width: 32px;
+
+    justify-content: center;
+    align-items: center;
+
+    font-size: 12px;
+  }
+
+  .commentMenuButton {
+    width: 28px;
+    height: 28px;
+
+    font-size: 18px;
+
+    padding: 0;
+  }
+}

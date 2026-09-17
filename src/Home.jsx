@@ -964,11 +964,18 @@ useEffect(() => {
   
     return (
     <div className="app">
-        <button
+      <button
   className={`mobile-menu-button ${menuOpen ? "open" : ""}`}
   onClick={() => setMenuOpen((current) => !current)}
+  aria-label={menuOpen ? "ปิดเมนู" : "เปิดเมนู"}
 >
-  {menuOpen ? "✕ ปิด" : "☰ เมนู"}
+  <span className="mobile-menu-icon">
+    {menuOpen ? "✕" : "☰"}
+  </span>
+
+  <span className="mobile-menu-text">
+    {menuOpen ? "ปิด" : "เมนู"}
+  </span>
 </button>
       {/* Sidebar */}
       <aside className={`sidebar ${menuOpen ? "open" : ""}`}>
