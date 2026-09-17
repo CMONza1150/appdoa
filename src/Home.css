@@ -1828,59 +1828,7 @@ font-size: 20px;
 
 
 
-/* ===== Final Table Width Fix ===== */
 
-.workTable {
-  width: 1500px;
-  min-width: 1500px;
-  table-layout: fixed;
-}
-
-.workTable th:nth-child(1),
-.workTable td:nth-child(1) {
-  width: 80px;
-}
-
-.workTable th:nth-child(2),
-.workTable td:nth-child(2) {
-  width: 150px;
-}
-
-.workTable th:nth-child(3),
-.workTable td:nth-child(3) {
-  width: 220px;
-}
-
-.workTable th:nth-child(4),
-.workTable td:nth-child(4) {
-  width: 320px;
-}
-
-.workTable th:nth-child(5),
-.workTable td:nth-child(5) {
-  width: 140px;
-}
-
-.workTable th:nth-child(6),
-.workTable td:nth-child(6) {
-  width: 130px;
-}
-
-.workTable th:nth-child(7),
-.workTable td:nth-child(7) {
-  width: 300px;
-}
-
-.workTable th:nth-child(8),
-.workTable td:nth-child(8) {
-  width: 120px;
-}
-
-.workTable td {
-  white-space: normal;
-  word-break: break-word;
-  overflow-wrap: break-word;
-}
 
 /* ===== Assignee Search ===== */
 
@@ -2470,12 +2418,7 @@ font-size: 20px;
    ===================================== */
 
 
-/* ===== LOCALHOST DEFAULT ===== */
 
-.workTable {
-  width: 1500px;
-  min-width: 1500px;
-}
 
 
 /* ===== PC DESKTOP ===== */
@@ -2568,39 +2511,78 @@ font-size: 20px;
 }
 
 
-/* ===== MOBILE ===== */
+ /* =============================
+    MOBILE TABLE FIX
+    ============================= */
 
 @media (max-width: 768px) {
+  .tableBox {
+    padding: 12px;
+  }
 
   .tableWrapper {
+    width: 100%;
     overflow-x: auto !important;
   }
 
   .workTable {
-    width: 1500px !important;
-    min-width: 1500px !important;
+    width: 1700px !important;
+    min-width: 1700px !important;
   }
 
   .workTable th,
   .workTable td {
+    padding: 12px 10px;
     font-size: 14px;
-    white-space: normal;
   }
 
-  .assigneeSearchInput {
-    width: 100%;
-    min-width: 190px;
+  /* เลขรับ */
+  .workTable th:nth-child(1),
+  .workTable td:nth-child(1) {
+    width: 90px !important;
   }
 
-  .assigneeDropdown {
-    width: 230px;
-    max-width: 230px;
+  /* เจ้าของเรื่อง */
+  .workTable th:nth-child(2),
+  .workTable td:nth-child(2) {
+    width: 170px !important;
   }
 
-  .statusWithComment {
-    flex-wrap: nowrap;
+  /* ผู้ปฏิบัติงาน */
+  .workTable th:nth-child(3),
+  .workTable td:nth-child(3) {
+    width: 230px !important;
   }
 
+  /* เรื่อง */
+  .workTable th:nth-child(4),
+  .workTable td:nth-child(4) {
+    width: 350px !important;
+  }
+
+  /* สถานะ */
+  .workTable th:nth-child(5),
+  .workTable td:nth-child(5) {
+    width: 180px !important;
+  }
+
+  /* วัน */
+  .workTable th:nth-child(6),
+  .workTable td:nth-child(6) {
+    width: 140px !important;
+  }
+
+  /* หมายเหตุ */
+  .workTable th:nth-child(7),
+  .workTable td:nth-child(7) {
+    width: 350px !important;
+  }
+
+  /* เอกสาร */
+  .workTable th:nth-child(8),
+  .workTable td:nth-child(8) {
+    width: 180px !important;
+  }
 }
 
 /* =====================================
@@ -3018,3 +3000,16 @@ font-size: 20px;
   }
 }
 
+
+.attachmentActions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.attachmentViewButton,
+.attachmentUploadButton {
+  width: 100px;
+  justify-content: center;
+}
