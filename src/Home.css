@@ -2670,3 +2670,104 @@ font-size: 20px;
   }
 
 }
+
+
+/* ===== Desktop Full Table Layout ===== */
+
+@media (min-width: 1200px) {
+
+  /* ===== Content ===== */
+
+  .content {
+    overflow-x: hidden;
+  }
+
+  /* ===== Table Box ===== */
+
+  .tableBox {
+    width: 100%;
+    overflow: visible;
+  }
+
+  /* ===== Table Wrapper ===== */
+
+  .tableWrapper {
+    width: 100%;
+    overflow-x: hidden;
+  }
+
+  /* ===== Work Table ===== */
+
+  .workTable {
+    width: 100% !important;
+    min-width: 0 !important;
+
+    table-layout: fixed;
+  }
+
+  /* ===== เลขรับ ===== */
+
+  .workTable th:nth-child(1),
+  .workTable td:nth-child(1) {
+    width: 7%;
+  }
+
+  /* ===== เจ้าของเรื่อง ===== */
+
+  .workTable th:nth-child(2),
+  .workTable td:nth-child(2) {
+    width: 12%;
+  }
+
+  /* ===== ผู้ปฏิบัติงาน ===== */
+
+  .workTable th:nth-child(3),
+  .workTable td:nth-child(3) {
+    width: 15%;
+  }
+
+  /* ===== เรื่อง ===== */
+
+  .workTable th:nth-child(4),
+  .workTable td:nth-child(4) {
+    width: 25%;
+  }
+
+  /* ===== สถานะ ===== */
+
+  .workTable th:nth-child(5),
+  .workTable td:nth-child(5) {
+    width: 10%;
+  }
+
+  /* ===== วันที่กำหนดส่ง ===== */
+
+  .workTable th:nth-child(6),
+  .workTable td:nth-child(6) {
+    width: 10%;
+  }
+
+  /* ===== หมายเหตุ ===== */
+
+  .workTable th:nth-child(7),
+  .workTable td:nth-child(7) {
+    width: 16%;
+  }
+
+  /* ===== เอกสารแนบ ===== */
+
+  .workTable th:nth-child(8),
+  .workTable td:nth-child(8) {
+    width: 5%;
+  }
+
+  /* ===== Table Cell ===== */
+
+  .workTable td {
+    font-size: 14px;
+    line-height: 1.5;
+
+    word-break: break-word;
+  }
+
+}
