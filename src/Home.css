@@ -2175,7 +2175,10 @@ body {
   cursor: pointer;
 }
 
-sidebar {
+.sidebar,
+.sidebar-container,
+.sidebar-wrapper {
   box-shadow: none !important;
   border-right: none !important;
+  filter: none ! important;
 }
