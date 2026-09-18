@@ -1918,15 +1918,6 @@ body {
     transform: scale(0.97);
   }
 
-  .mobile-menu-button.open {
-  background: #dc2626 !important;
-  color: white !important;
-  border-color: #ef5350 !important;
-
-  box-shadow:
-    0 0 8px #ef5350,
-    0 0 18px rgba(239, 83, 80, 0.8) !important;
-}
 
   .mobile-menu-icon {
     display: inline-flex;
@@ -2175,10 +2166,17 @@ body {
   cursor: pointer;
 }
 
-.sidebar,
+ button.mobile-menu-button.open {
+  background: #dc2626 !important;
+  color: white !important;
+  border-color: #ef5350 !important;
+
+  box-shadow:
+    0 0 8px #ef5350,
+    0 0 18px rgba(239, 83, 80, 0.8) !important;
+}
+
 .sidebar-container,
 .sidebar-wrapper {
-  box-shadow: none !important;
-  border-right: none !important;
-  filter: none ! important;
+  box-shadow: none;
 }
