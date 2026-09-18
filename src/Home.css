@@ -1865,13 +1865,7 @@ body {
   }
 
   .sidebar.open::after {
-    content: "";
-    position: fixed;
-    left: 270px;
-    right: 0;
-    top: 0;
-    bottom: 0;
-    background: rgba(0, 0, 0, 0.45);
+   display: none;
   }
 }
 
