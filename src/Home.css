@@ -1831,15 +1831,15 @@ body {
     position: fixed;
     top: 15px;
     left: 15px;
-    width: 45px;
-    height: 45px;
+    width: 100px;
+    height: 52px;
     align-items: center;
     justify-content: center;
     background: #0f3d73;
     color: white;
     border: none;
     border-radius: 12px;
-    font-size: 22px;
+    font-size: 18px;
     z-index: 5000;
   }
 
@@ -2115,4 +2115,32 @@ body {
     width: 100px;
     justify-content: center;
   }
+}
+
+
+@media (min-width: 1025px) and (max-width: 1199px) {
+
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: -290px;
+    width: 270px;
+    height: 100vh;
+    z-index: 4000;
+    transition: 0.3s ease;
+  }
+
+  .sidebar.open {
+    left: 0;
+  }
+
+  .content {
+    width: 100%;
+    margin-left: 0;
+  }
+
+  .mobile-menu-button {
+    display: flex;
+  }
+
 }

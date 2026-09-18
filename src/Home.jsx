@@ -22,10 +22,6 @@ import { saveAs } from "file-saver";
 const API_URLS = 
 "https://script.google.com/macros/s/AKfycbx2DVOZKIOQ0ryjnJ1jOHbtG6rzrjGKyIfEbcdXrppIvDTlgkWq_vsZUjJjSUeKkha2/exec";
 
-// URL ของ กตป ระบบติดตามงบประมาณ //
-const BUDGET_DASHBOARD_URL = 
-"https://script.google.com/macros/s/AKfycbyf1OoM5YqOiadIKUCz9LmXmAAReZJH_tsvIz5Zfc7vkLSMIjZGkcJilt1rJOYsRVVNMQ/exec";
-
 
 function formatSheetDateForFilter(dateText) {
   if (!dateText) return "";
@@ -1067,22 +1063,7 @@ useEffect(() => {
       ติดตามงาน
     </button>
 
-    <button
-      className={
-        department === item.name &&
-        departmentView === "budget"
-          ? "submenuButton active"
-          : "submenuButton"
-      }
-      onClick={() =>
-        selectDepartmentView(
-          item.name,
-          "budget"
-        )
-      }
-    >
-      ติดตามงบประมาณ
-    </button>
+    
 
     {getDepartmentLinks(item.permission).map(
       (link) => (
@@ -1158,7 +1139,7 @@ useEffect(() => {
       
 
       {/* Main Content */}
-      <main className={'content ${departmentView === "budget" ? "budgetMode" : ""}'}>
+      <main className={"content "}>
 
        
 {menu === "users" && user?.role === "admin" ? (
@@ -1184,19 +1165,7 @@ className="budgetDashboardFrame"
 </div>
 
 
-) : departmentView === "budget" &&
-department !== "ทั้งหมด" ? (
-
-<div className="budgetDashboardContainer">
-<iframe
-src={BUDGET_DASHBOARD_URL}
-title="Dashboard ติดตามงบประมาณ"
-className="budgetDashboardFrame"
-/>
-</div>
-
-
-) : (
+)  : (
 
 <>
   
