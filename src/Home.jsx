@@ -20,7 +20,7 @@ import { saveAs } from "file-saver";
 
 // URLs ของ google sheet ตารางงานกองแผนงาน //
 const API_URLS = 
-"https://script.google.com/macros/s/AKfycbx2DVOZKIOQ0ryjnJ1jOHbtG6rzrjGKyIfEbcdXrppIvDTlgkWq_vsZUjJjSUeKkha2/exec";
+"https://script.google.com/macros/s/AKfycbyhl4Xg5_5DrSmcGEL3iKV3uLVfwkpduuRUCv9HdBMer4IZJL_LBfk_MQ5eaPvn0BI8/exec";
 
 
 function formatSheetDateForFilter(dateText) {
@@ -119,7 +119,6 @@ function Home({user, onLogout}) {
 
     const [assigneeSearch, setAssigneeSearch] = useState("");
 
-    const [uploadingAttachment, setUploadingAttachment] = useState("");
     
     //date sql filter
     const [passengerStartDate, setPassengerStartDate] = useState("");
@@ -129,7 +128,13 @@ function Home({user, onLogout}) {
     const [passengerView, setPassengerView] = useState("day"); // "chart" หรือ "table"
    
 function loadUserOptions() {
-  fetch(`${API_URLS}?action=listUsers`)
+  fetch(
+    `${API_URLS}?action=listUsers`,
+  {
+    method: "GET",
+    redirect: "follow",
+  }
+)
     .then((res) => res.json())
     .then((data) => {
       if (data.success) {
@@ -670,83 +675,6 @@ function saveMultipleAssignee() {
 
 
 
-async function uploadAttachment(row, file) {
-  if (!file) {
-    return;
-  }
-
-  try {
-    setUploadingAttachment(row.เลขรับ);
-
-    const base64Data = await new Promise(
-      (resolve, reject) => {
-        const reader = new FileReader();
-
-        reader.onload = () => {
-          const result = String(
-            reader.result || ""
-          );
-
-          const base64 =
-            result.split(",")[1] || "";
-
-          resolve(base64);
-        };
-
-        reader.onerror = reject;
-
-        reader.readAsDataURL(file);
-      }
-    );
-
-    const response = await fetch(API_URLS, {
-      method: "POST",
-      body: JSON.stringify({
-        action: "uploadAttachment",
-        sheet: selectedSheet,
-        receiveNumber: row.เลขรับ,
-        fileName: file.name,
-        mimeType:
-          file.type ||
-          "application/octet-stream",
-        base64Data: base64Data,
-      }),
-    });
-
-    const result = await response.json();
-
-    if (!result.success) {
-      alert(
-        result.message ||
-          "อัปโหลดเอกสารไม่สำเร็จ"
-      );
-
-      return;
-    }
-
-    setAllRows((currentRows) =>
-      currentRows.map((item) =>
-        item.เลขรับ === row.เลขรับ
-          ? {
-              ...item,
-              เอกสารแนบ: result.url,
-            }
-          : item
-      )
-    );
-
-    alert("อัปโหลดเอกสารสำเร็จ");
-  } catch (error) {
-    console.error(
-      "Upload attachment error:",
-      error
-    );
-
-    alert("อัปโหลดเอกสารไม่สำเร็จ");
-  } finally {
-    setUploadingAttachment("");
-  }
-}
 
 
 
@@ -1707,52 +1635,21 @@ className="budgetDashboardFrame"
               </td>
               <td>{row.หมายเหตุ}</td>
              <td className="attachment-cell attachmentColumn">
-  <div className="attachmentActions">
-    {row.เอกสารแนบ && (
-      <a
-        href={row.เอกสารแนบ}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="attachmentViewButton"
-        title="เปิดเอกสาร"
-      >
-        📄 เปิด
-      </a>
-    )}
-
-    <label
-      className={
-        uploadingAttachment === row.เลขรับ
-          ? "attachmentUploadButton uploading"
-          : "attachmentUploadButton"
-      }
-    >
-      {uploadingAttachment === row.เลขรับ
-        ? "กำลังอัปโหลด..."
-        : row.เอกสารแนบ
-        ? "เปลี่ยนไฟล์"
-        : "+ เพิ่มไฟล์"}
-
-      <input
-        type="file"
-        accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png"
-        hidden
-        disabled={
-          uploadingAttachment === row.เลขรับ
-        }
-        onChange={(event) => {
-          const file =
-            event.target.files?.[0];
-
-          if (file) {
-            uploadAttachment(row, file);
-          }
-
-          event.target.value = "";
-        }}
-      />
-    </label>
-  </div>
+  {row.เอกสารแนบ ? (
+  <a
+    href={row.เอกสารแนบ}
+    target="_blank"
+    rel="noopener noreferrer"
+  >
+    <img
+      src={row.เอกสารแนบ}
+      width="80"
+      alt="เอกสารแนบ"
+    />
+  </a>
+) : (
+  "-"
+)}
 </td>
             </tr>
           ))
