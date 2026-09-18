@@ -1919,9 +1919,14 @@ body {
   }
 
   .mobile-menu-button.open {
-    background: linear-gradient(135deg, #b91c1c, #dc2626);
-    box-shadow: 0 10px 24px rgba(185, 28, 28, 0.28);
-  }
+  background: #dc2626 !important;
+  color: white !important;
+  border-color: #ef5350 !important;
+
+  box-shadow:
+    0 0 8px #ef5350,
+    0 0 18px rgba(239, 83, 80, 0.8) !important;
+}
 
   .mobile-menu-icon {
     display: inline-flex;
@@ -2168,4 +2173,9 @@ body {
   box-shadow: 0 10px 24px rgba(185, 28, 28, 0.28);
 
   cursor: pointer;
+}
+
+sidebar {
+  box-shadow: none !important;
+  border-right: none !important;
 }
