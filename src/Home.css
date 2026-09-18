@@ -2144,3 +2144,28 @@ body {
   }
 
 }
+
+/* Sidebar close button */
+.menu-close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+
+  width: 125px;
+  height: 52px;
+  padding: 0 16px;
+
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 16px;
+
+  background: linear-gradient(135deg, #b91c1c, #dc2626);
+  color: white;
+
+  font-size: 18px;
+  font-weight: 700;
+
+  box-shadow: 0 10px 24px rgba(185, 28, 28, 0.28);
+
+  cursor: pointer;
+}
