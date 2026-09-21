@@ -1783,13 +1783,22 @@ className="budgetDashboardFrame"
               <td>{row.เจ้าของเรื่อง || "-"}</td>
               <td>
   <button
-    className="assigneePickerButton"
-    onClick={() => openAssigneeModal(row)}
-  >
-    {row.ชื่อผู้ปฏิบัติงาน
-      ? row.ชื่อผู้ปฏิบัติงาน
-      : "เลือกผู้ปฏิบัติงาน"}
-  </button>
+  className="assigneePickerButton"
+  onClick={() => openAssigneeModal(row)}
+  style={{
+    whiteSpace: "pre-line",
+    textAlign: "left",
+    lineHeight: "1.8",
+  }}
+>
+  {row.ชื่อผู้ปฏิบัติงาน
+    ? row.ชื่อผู้ปฏิบัติงาน
+        .split(",")
+        .map((name) => name.trim())
+        .filter(Boolean)
+        .join("\n")
+    : "เลือกผู้ปฏิบัติงาน"}
+</button>
 </td>
               <td>{row.เรื่อง}</td>
              
@@ -1847,6 +1856,7 @@ className="budgetDashboardFrame"
   {row.hasAttachment ? (
     <button
       type="button"
+      className="attachmentOpenButton"
       onClick={() => openAttachment(row)}
     >
       📄 เปิดเอกสาร

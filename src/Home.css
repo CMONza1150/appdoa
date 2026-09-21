@@ -2218,3 +2218,64 @@ body {
   }
 
 }
+
+/* ปุ่มเปิดเอกสารบนมือถือ */
+@media (max-width: 768px) {
+
+.workTable td.attachmentColumn {
+padding: 6px 4px;
+}
+
+.workTable td.attachmentColumn .attachmentOpenButton {
+display: block;
+width: 100%;
+max-width: 100%;
+min-width: 0;
+box-sizing: border-box;
+
+padding: 8px 4px;
+font-size: 12px;
+line-height: 1.4;
+
+white-space: normal;
+overflow-wrap: anywhere;
+text-align: center;
+}
+
+}
+
+/* =====================================
+   ปรับขนาดหัวข้อทุกหน้า
+   ===================================== */
+
+/* Desktop และ Tablet */
+.content h1 {
+  font-size: 26px !important;
+  line-height: 1.3;
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+
+/* หัวข้อหน้าหลักและหน้าแผนก */
+.pageTitleBox h1 {
+  padding: 6px 12px !important;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+  .content h1 {
+    font-size: 20px !important;
+    line-height: 1.3;
+  }
+
+  .pageTitleBox {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .pageTitleBox h1 {
+    padding: 5px 8px !important;
+  }
+}
