@@ -793,19 +793,32 @@ async function openAttachment(row) {
 
     newTab.location.href =
       result.url;
-  } catch (error) {
-    newTab.close();
+ } catch (error) {
+  newTab?.close();
 
-    console.error(
-      "Open attachment error:",
-      error
-    );
+  console.error(
+    "Open attachment error:",
+    error
+  );
 
+  if (
+    error instanceof TypeError ||
+    error.message === "Failed to fetch"
+  ) {
     alert(
-      error.message ||
-        "เปิดเอกสารไม่สำเร็จ"
+      "ไม่สามารถเชื่อมต่อเพื่อเปิดเอกสารได้\n\n" +
+        "หากเปิดเว็บไซต์ผ่าน LINE หรือเบราว์เซอร์ภายในแอป " +
+        "กรุณาเลือกเมนู เปิดในเบราว์เซอร์ภายนอก " +
+        "แล้วลองเปิดด้วย Chrome อีกครั้ง"
     );
+    return;
   }
+
+  alert(
+    error.message ||
+      "เปิดเอกสารไม่สำเร็จ"
+  );
+}
 }
 
 
