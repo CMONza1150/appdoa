@@ -7,7 +7,7 @@ import Register from "./Register";
 // Apps Script URL
 // ===============================
 const API_URLS = 
-  "https://script.google.com/macros/s/AKfycbx2DVOZKIOQ0ryjnJ1jOHbtG6rzrjGKyIfEbcdXrppIvDTlgkWq_vsZUjJjSUeKkha2/exec";
+  "https://script.google.com/macros/s/AKfycbyhl4Xg5_5DrSmcGEL3iKV3uLVfwkpduuRUCv9HdBMer4IZJL_LBfk_MQ5eaPvn0BI8/exec";
 
 
 
@@ -16,24 +16,14 @@ const API_URLS =
 // ===============================
 function App() {
   const [user, setUser] = useState(null);
+  const [sessionToken, setSessionToken] = useState("");
   const [checkingLogin, setCheckingLogin] = useState(true);
   const [showRegister, setShowRegister] = useState(false);
 
   useEffect(() => {
-    const savedUser = sessionStorage.getItem("loggedInUser");
+    sessionStorage.removeItem("loggedInUser");
 
-    if (savedUser) {
-      try {
-        setUser(JSON.parse(savedUser));
-      } catch (error) {
-        console.error(
-          "อ่านข้อมูลผู้ใช้ไม่สำเร็จ:",
-          error
-        );
-
-        sessionStorage.removeItem("loggedInUser");
-      }
-    }
+        
 
     setCheckingLogin(false);
   }, []);
@@ -52,13 +42,23 @@ function App() {
     const result = await response.json();
 
     if (result.success) {
-      setUser(result.user);
+  // ต้องได้รับทั้งข้อมูลผู้ใช้และ Session Token
+  if (
+    !result.user ||
+    !result.sessionToken
+  ) {
+    return {
+      success: false,
+      message:
+        "API Login ยังไม่ส่ง Session Token",
+    };
+  }
 
-      sessionStorage.setItem(
-        "loggedInUser",
-        JSON.stringify(result.user)
-      );
-    }
+  setUser(result.user);
+  setSessionToken(
+    result.sessionToken
+  );
+}
 
     return result;
   } catch (error) {
@@ -73,6 +73,7 @@ function App() {
 
   function handleLogout() {
     sessionStorage.removeItem("loggedInUser");
+    setSessionToken("");
     setUser(null);
   }
 
@@ -104,6 +105,7 @@ function App() {
   return (
     <Home
       user={user}
+      sessionToken={sessionToken}
       onLogout={handleLogout}
     />
   );

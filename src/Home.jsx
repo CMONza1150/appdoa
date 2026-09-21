@@ -80,7 +80,7 @@ const DEPARTMENT_MENUS = [
 
 
 
-function Home({user, onLogout}) {
+function Home({user, sessionToken,onLogout}) {
     const [menuOpen, setMenuOpen] = useState(false);
     const [department, setDepartment] = useState("ทั้งหมด");
     const tableRef = useRef(null);
@@ -127,36 +127,57 @@ function Home({user, onLogout}) {
     const [selectedAirport, setSelectedAirport] = useState("ทั้งหมด");
     const [passengerView, setPassengerView] = useState("day"); // "chart" หรือ "table"
    
-function loadUserOptions() {
-  fetch(
-    `${API_URLS}?action=listUsers`,
-  {
-    method: "GET",
-    redirect: "follow",
+async function loadUserOptions() {
+  if (!sessionToken) {
+    setUserOptions([]);
+    return;
   }
-)
-    .then((res) => res.json())
-    .then((data) => {
-      if (data.success) {
-        const activeUsers = (data.users || []).filter(
-  (item) =>
-    item.active === true ||
-    item.active === "TRUE" ||
-    item.active === "true"
-);
 
-setUserOptions(activeUsers);
-console.log("users:", activeUsers);
-
-        setUserOptions(activeUsers);
+  try {
+    const response = await fetch(
+      API_URLS,
+      {
+        method: "POST",
+        body: JSON.stringify({
+          action: "listUsers",
+          sessionToken: sessionToken,
+        }),
       }
-    })
-    .catch((error) => {
-      console.error(
-        "Load users error:",
-        error
+    );
+
+    if (!response.ok) {
+      throw new Error(
+        "โหลดรายชื่อผู้ใช้ไม่สำเร็จ"
       );
-    });
+    }
+
+    const data =
+      await response.json();
+
+    if (!data.success) {
+      throw new Error(
+        data.message ||
+          "โหลดรายชื่อผู้ใช้ไม่สำเร็จ"
+      );
+    }
+
+    const activeUsers =
+      (data.users || []).filter(
+        (item) =>
+          item.active === true ||
+          item.active === "TRUE" ||
+          item.active === "true"
+      );
+
+    setUserOptions(activeUsers);
+  } catch (error) {
+    console.error(
+      "Load users error:",
+      error
+    );
+
+    setUserOptions([]);
+  }
 }
 
 function openLinkDashboard(link) {
@@ -397,34 +418,103 @@ const airportOptions = useMemo(() => {return [
   return matchesSearch && matchesStatus;
 });
 
-function loadSheetOptions() {
-  fetch(`${API_URLS}?action=listSheets`)
-    .then((res) => res.json())
-    .then((data) => {
-      const sheets = data.sheets || [];
+async function loadSheetOptions() {
+  if (!sessionToken) {
+    return;
+  }
 
-      setSheetOptions(sheets);
-
-      if (sheets.length > 0) {
-        setSelectedSheet((current) => current || sheets[0]);
+  try {
+    const response = await fetch(
+      API_URLS,
+      {
+        method: "POST",
+        body: JSON.stringify({
+          action: "listSheets",
+          sessionToken: sessionToken,
+        }),
       }
-    })
-    .catch((error) => {
-      console.error("Load sheet options error:", error);
-    });
+    );
+
+    const data =
+      await response.json();
+
+    if (!data.success) {
+      throw new Error(
+        data.message ||
+          "โหลดรายชื่อชีตไม่สำเร็จ"
+      );
+    }
+
+    const sheets =
+      data.sheets || [];
+
+    setSheetOptions(sheets);
+
+    if (sheets.length > 0) {
+      setSelectedSheet(
+        (current) =>
+          sheets.includes(current)
+            ? current
+            : sheets[0]
+      );
+    }
+  } catch (error) {
+    console.error(
+      "Load sheet options error:",
+      error
+    );
+
+    setSheetOptions([]);
+  }
 }
 
-function loadDepartmentLinks() {
-  fetch(`${API_URLS}?action=listLinks`)
-    .then((res) => res.json())
-    .then((data) => {
-      if (data.success) {
-        setDepartmentLinks(data.links);
+async function loadDepartmentLinks() {
+  if (!sessionToken) {
+    setDepartmentLinks([]);
+    return;
+  }
+
+  try {
+    const response = await fetch(
+      API_URLS,
+      {
+        method: "POST",
+        body: JSON.stringify({
+          action: "listLinks",
+          sessionToken: sessionToken,
+        }),
       }
-    })
-    .catch((error) => {
-      console.error("Load links error:", error);
-    });
+    );
+
+    if (!response.ok) {
+      throw new Error(
+        "โหลดรายการ Link ไม่สำเร็จ"
+      );
+    }
+
+    const data =
+      await response.json();
+
+    if (!data.success) {
+      throw new Error(
+        data.message ||
+          "โหลดรายการ Link ไม่สำเร็จ"
+      );
+    }
+
+    setDepartmentLinks(
+      Array.isArray(data.links)
+        ? data.links
+        : []
+    );
+  } catch (error) {
+    console.error(
+      "Load links error:",
+      error
+    );
+
+    setDepartmentLinks([]);
+  }
 }
    
 function isOverdue(row) {
@@ -590,32 +680,132 @@ function chooseDepartment(name) {
   }, 100);
 }                  
     
-   function loadData() {
-  if (!selectedSheet) {
+  async function loadData() {
+  if (
+    !selectedSheet ||
+    !sessionToken
+  ) {
+    setAllRows([]);
     return;
   }
 
   setLoading(true);
 
-  const url = `${API_URLS}?sheet=${encodeURIComponent(selectedSheet)}`;
-
-  fetch(url)
-    .then((res) => {
-      if (!res.ok) {
-        throw new Error("โหลดข้อมูลไม่สำเร็จ");
+  try {
+    const response = await fetch(
+      API_URLS,
+      {
+        method: "POST",
+        body: JSON.stringify({
+          action: "getWorkRows",
+          sheet: selectedSheet,
+          sessionToken: sessionToken,
+        }),
       }
+    );
 
-      return res.json();
-    })
-    .then((data) => {
-      setAllRows(data.rows || []);
-    })
-    .catch((error) => {
-      console.error("Load data error:", error);
-    })
-    .finally(() => {
-      setLoading(false);
-    });
+    if (!response.ok) {
+      throw new Error(
+        "โหลดข้อมูลไม่สำเร็จ"
+      );
+    }
+
+    const data =
+      await response.json();
+
+    if (!data.success) {
+      throw new Error(
+        data.message ||
+          "โหลดข้อมูลไม่สำเร็จ"
+      );
+    }
+
+    setAllRows(
+      Array.isArray(data.rows)
+        ? data.rows
+        : []
+    );
+  } catch (error) {
+    console.error(
+      "Load data error:",
+      error
+    );
+
+    // ไม่แสดงข้อมูลเดิมเมื่อโหลดข้อมูลไม่สำเร็จ
+    setAllRows([]);
+  } finally {
+    setLoading(false);
+  }
+}
+
+async function openAttachment(row) {
+  if (
+    !row.hasAttachment ||
+    !sessionToken
+  ) {
+    alert(
+      "ไม่พบเอกสารแนบหรือ Session หมดอายุ"
+    );
+    return;
+  }
+
+  // เปิดแท็บไว้ทันที เพื่อป้องกัน Popup Blocker
+  const newTab =
+    window.open("", "_blank");
+
+  if (!newTab) {
+    alert(
+      "กรุณาอนุญาตให้เบราว์เซอร์เปิดแท็บใหม่"
+    );
+    return;
+  }
+
+  newTab.opener = null;
+
+  try {
+    const response = await fetch(
+      API_URLS,
+      {
+        method: "POST",
+        body: JSON.stringify({
+          action: "getAttachmentUrl",
+          sheet: selectedSheet,
+          row: row.sheetRow,
+          sessionToken: sessionToken,
+        }),
+      }
+    );
+
+    const result =
+      await response.json();
+
+    if (
+      !result.success ||
+      !/^https:\/\//i.test(
+        result.url || ""
+      )
+    ) {
+      throw new Error(
+        result.message ||
+          "ไม่สามารถเปิดเอกสารได้"
+      );
+    }
+
+    newTab.location.href =
+      result.url;
+  } catch (error) {
+    newTab.close();
+
+    console.error(
+      "Open attachment error:",
+      error
+    );
+
+    alert(
+      error.message ||
+        "เปิดเอกสารไม่สำเร็จ"
+    );
+  }
 }
 
 
@@ -822,8 +1012,10 @@ async function saveComment() {
 }, [department, gwsSource]);
 
 useEffect(() => {
+  if (sessionToken) {
   loadUserOptions();
-}, []);
+  }
+}, [sessionToken]);
 
 useEffect(() => {
   if (!user) {
@@ -865,18 +1057,22 @@ useEffect(() => {
 
 
     useEffect(() => {
+      if (sessionToken) {
       loadDepartmentLinks();
-    }, []);
+      }
+    }, [sessionToken]);
 
     useEffect(() => {
+      if (sessionToken) {
       loadSheetOptions();
-    }, []);
+    }
+    }, [sessionToken]);
     
     useEffect(() => {
-      if (selectedSheet) {
+      if (selectedSheet && sessionToken) {
       loadData();
       }
-    }, [selectedSheet]);
+    }, [selectedSheet, sessionToken]);
 
     useEffect(() => {
   const timer = setInterval(() => {
@@ -1073,7 +1269,7 @@ useEffect(() => {
 {menu === "users" && user?.role === "admin" ? (
   <UserManagement />
 ) : menu === "links" && user?.role === "admin" ? (
-  <LinkManagement />
+  <LinkManagement  sessionToken={sessionToken}/>
 ) : (
   <>
 
@@ -1634,22 +1830,17 @@ className="budgetDashboardFrame"
                 {row.วันที่กำหนดส่ง}
               </td>
               <td>{row.หมายเหตุ}</td>
-             <td className="attachment-cell attachmentColumn">
-  {row.เอกสารแนบ ? (
-  <a
-    href={row.เอกสารแนบ}
-    target="_blank"
-    rel="noopener noreferrer"
-  >
-    <img
-      src={row.เอกสารแนบ}
-      width="80"
-      alt="เอกสารแนบ"
-    />
-  </a>
-) : (
-  "-"
-)}
+            <td className="attachment-cell attachmentColumn">
+  {row.hasAttachment ? (
+    <button
+      type="button"
+      onClick={() => openAttachment(row)}
+    >
+      📄 เปิดเอกสาร
+    </button>
+  ) : (
+    "-"
+  )}
 </td>
             </tr>
           ))

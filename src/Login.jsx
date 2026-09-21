@@ -2,7 +2,7 @@ import { useState } from "react";
 import "./Login.css";
 
 const API_URL =
-  "https://script.google.com/macros/s/AKfycbx2DVOZKIOQ0ryjnJ1jOHbtG6rzrjGKyIfEbcdXrppIvDTlgkWq_vsZUjJjSUeKkha2/exec";
+  "https://script.google.com/macros/s/AKfycbyhl4Xg5_5DrSmcGEL3iKV3uLVfwkpduuRUCv9HdBMer4IZJL_LBfk_MQ5eaPvn0BI8/exec";
 
 function Login({ onLogin }) {
   const [username, setUsername] = useState("");

@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react";
 import "./LinkManagement.css";
 
-const API_URL = "https://script.google.com/macros/s/AKfycbx2DVOZKIOQ0ryjnJ1jOHbtG6rzrjGKyIfEbcdXrppIvDTlgkWq_vsZUjJjSUeKkha2/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycbyhl4Xg5_5DrSmcGEL3iKV3uLVfwkpduuRUCv9HdBMer4IZJL_LBfk_MQ5eaPvn0BI8/exec";
 
 
 
-function LinkManagement() {
+function LinkManagement({ sessionToken }) {
   const [links, setLinks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
@@ -22,106 +22,212 @@ function LinkManagement() {
   const [editingLink, setEditingLink] = useState(null);
 
   const fetchLinks = async () => {
-    try {
-      const res = await fetch(`${API_URL}?action=listLinks`);
+    console.log("LinkManagement มี Session:", Boolean(sessionToken));
+  if (!sessionToken) {
+    setLinks([]);
+    setLoading(false);
+    return;
+  }
 
-      const data = await res.json();
+  setLoading(true);
 
-      if (data.success) {
-        setLinks(data.links);
+  try {
+    const res = await fetch(
+      API_URL,
+      {
+        method: "POST",
+        body: JSON.stringify({
+          action: "listLinks",
+          sessionToken:
+            sessionToken,
+        }),
       }
-    } catch (error) {
-      console.log(error);
+    );
+
+    if (!res.ok) {
+      throw new Error(
+        "โหลดรายการ Link ไม่สำเร็จ"
+      );
     }
 
+    const data =
+      await res.json();
+
+      console.log("ผลโหลด Link:", {
+success: data.success,
+count: Array.isArray(data.links) ? data.links.length : "ไม่มีรายการ",
+message: data.message || ""
+});
+
+    if (!data.success) {
+      throw new Error(
+        data.message ||
+          "โหลดรายการ Link ไม่สำเร็จ"
+      );
+    }
+
+    setLinks(
+      Array.isArray(data.links)
+        ? data.links
+        : []
+    );
+  } catch (error) {
+    console.error(
+      "Load links error:",
+      error
+    );
+
+    setLinks([]);
+  } finally {
     setLoading(false);
-  };
+  }
+};
 
   useEffect(() => {
+    if (sessionToken) {
     fetchLinks();
-  }, []);
+    }
+  }, [sessionToken]);
 
   
 const handleSubmit = async (e) => {
   e.preventDefault();
 
+  if (!sessionToken) {
+    alert(
+      "Session หมดอายุ กรุณาเข้าสู่ระบบใหม่"
+    );
+    return;
+  }
+
   try {
-    const res = await fetch(API_URL, {
-      method: "POST",
-      body: JSON.stringify({
-        action: editingLink ? "updateLink" : "addLink",
-        id: editingLink ? editingLink.id : null,
-        ...formData
-      })
+    const res = await fetch(
+      API_URL,
+      {
+        method: "POST",
+        body: JSON.stringify({
+          action: editingLink
+            ? "updateLink"
+            : "addLink",
+          id: editingLink
+            ? editingLink.id
+            : null,
+          ...formData,
+          sessionToken:
+            sessionToken,
+        }),
+      }
+    );
+
+    if (!res.ok) {
+      throw new Error(
+        "เชื่อมต่อ API ไม่สำเร็จ"
+      );
+    }
+
+    const data =
+      await res.json();
+
+    if (!data.success) {
+      alert(
+        data.message ||
+          "บันทึก Link ไม่สำเร็จ"
+      );
+      return;
+    }
+
+    alert(
+      editingLink
+        ? "แก้ไข Link สำเร็จ"
+        : "เพิ่ม Link สำเร็จ"
+    );
+
+    setShowModal(false);
+    setEditingLink(null);
+
+    setFormData({
+      name: "",
+      url: "",
+      category: "",
+      permission: ["all"],
+      status: "active",
     });
 
-    const data = await res.json();
-
-    if (data.success) {
-      alert(editingLink ? "แก้ไข Link สำเร็จ" : "เพิ่ม Link สำเร็จ");
-
-      setShowModal(false);
-      setEditingLink(null);
-
-      setFormData({
-        name: "",
-        url: "",
-        category: "",
-        permission: ["all"],
-        status: "active",
-      });
-
-      fetchLinks();
-    }
+    await fetchLinks();
   } catch (error) {
-    console.log(error);
+    console.error(
+      "Save link error:",
+      error
+    );
+
+    alert(
+      "บันทึก Link ไม่สำเร็จ"
+    );
   }
 };
 
-const editLink = (link) => {
-  setSelectedLink(link);
-
-  setFormData({
-    name: link.name,
-    url: link.url,
-    category: link.category,
-    permission: link.permission || ["all"],
-    status: link.status,
-  });
-
-  setShowModal(true);
-};
-
 const handleDelete = async (id) => {
-  const confirmDelete = window.confirm(
-    "ต้องการลบ Link นี้หรือไม่?"
-  );
+  const confirmDelete =
+    window.confirm(
+      "ต้องการลบ Link นี้หรือไม่?"
+    );
 
   if (!confirmDelete) {
     return;
   }
 
+  if (!sessionToken) {
+    alert(
+      "Session หมดอายุ กรุณาเข้าสู่ระบบใหม่"
+    );
+    return;
+  }
+
   try {
-    const res = await fetch(API_URL, {
-      method: "POST",
-      body: JSON.stringify({
-        action: "deleteLink",
-        id: id,
-      }),
-    });
+    const res = await fetch(
+      API_URL,
+      {
+        method: "POST",
+        body: JSON.stringify({
+          action: "deleteLink",
+          id: id,
+          sessionToken:
+            sessionToken,
+        }),
+      }
+    );
 
-    const data = await res.json();
-
-    if (data.success) {
-      alert("ลบ Link สำเร็จ");
-
-      fetchLinks();
+    if (!res.ok) {
+      throw new Error(
+        "เชื่อมต่อ API ไม่สำเร็จ"
+      );
     }
+
+    const data =
+      await res.json();
+
+    if (!data.success) {
+      alert(
+        data.message ||
+          "ลบ Link ไม่สำเร็จ"
+      );
+      return;
+    }
+
+    alert("ลบ Link สำเร็จ");
+
+    await fetchLinks();
   } catch (error) {
-    console.log(error);
+    console.error(
+      "Delete link error:",
+      error
+    );
+
+    alert(
+      "ลบ Link ไม่สำเร็จ"
+    );
   }
 };
-
 
 
 
