@@ -744,7 +744,7 @@ async function openAttachment(row) {
     !sessionToken
   ) {
     alert(
-      "ไม่พบเอกสารแนบหรือ Session หมดอายุ"
+      "กำลังจัดเตรียมการแนบเอกสาร !!"
     );
     return;
   }
