@@ -1852,6 +1852,18 @@ className="budgetDashboardFrame"
                 {row.วันที่กำหนดส่ง}
               </td>
               <td>{row.หมายเหตุ}</td>
+              
+              {row.hasAttachment ? (
+    <button
+      type="button"
+      className="attachmentOpenButton"
+      onClick={() => openAttachment(row)}
+    >
+      📄 แนบเอกสาร
+    </button>
+  ) : (
+    "-"
+  )}
             <td className="attachment-cell attachmentColumn">
   {row.hasAttachment ? (
     <button
@@ -1870,7 +1882,7 @@ className="budgetDashboardFrame"
       className="attachmentOpenButton"
       onClick={() => openAttachment(row)}
     >
-      📄 แนบเอกสาร
+      📄 แนบเอกสารxx
     </button>
   ) : (
     "-"
