@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import "./App.css";
 import Home from "./Home";
 import Login from "./Login";
-import Register from "./Register";
+
 // ===============================
 // Apps Script URL
 // ===============================

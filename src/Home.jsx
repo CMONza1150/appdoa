@@ -1864,6 +1864,17 @@ className="budgetDashboardFrame"
   ) : (
     "-"
   )}
+  {row.hasAttachment ? (
+    <button
+      type="button"
+      className="attachmentOpenButton"
+      onClick={() => openAttachment(row)}
+    >
+      📄 แนบเอกสาร
+    </button>
+  ) : (
+    "-"
+  )}
 </td>
             </tr>
           ))
